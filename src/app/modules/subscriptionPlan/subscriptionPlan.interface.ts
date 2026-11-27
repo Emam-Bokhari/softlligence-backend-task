@@ -1,4 +1,5 @@
 
+import { Model } from "mongoose";
 import { PLAN_DURATION } from "../../../enums/subscription";
 
 export type TPlanFeatures = {
@@ -19,4 +20,7 @@ export type TSubscriptionPlan = {
   createdAt?: Date;
   updatedAt?: Date;
 };
+
+export type SubscriptionPlanModel = Model<TSubscriptionPlan>;
+
 
