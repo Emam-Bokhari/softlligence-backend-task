@@ -28,11 +28,9 @@ export type TUser = {
   updatedAt?: Date;
 };
 
-export type UserModal = {
+export type UserModel = {
   isExistUserById(id: string): Promise<TUser | null>;
   isExistUserByEmail(email: string): Promise<TUser | null>;
   isMatchPassword(password: string, hashPassword: string): Promise<boolean>;
 } & Model<TUser>;
 
-export type IUserModel = UserModal;
-export type IUser = TUser;

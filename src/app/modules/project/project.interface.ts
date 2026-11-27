@@ -13,6 +13,6 @@ export type TProject = {
   updatedAt?: Date;
 };
 
-export type IProject = TProject;
 export type ProjectModel = Model<TProject>;
-export type IProjectModel = ProjectModel;
+
+

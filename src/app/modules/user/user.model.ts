@@ -1,10 +1,12 @@
 import { model, Schema } from "mongoose";
 import { GENDER, STATUS, USER_ROLES } from "../../../enums/user";
-import { IUserModel, TUser } from "./user.interface";
+import { UserModel, TUser } from "./user.interface";
+
 import bcrypt from "bcrypt";
 import config from "../../../config";
 
-const userSchema = new Schema<TUser, IUserModel>(
+const userSchema = new Schema<TUser, UserModel>(
+
   {
     name: {
       type: String,
@@ -122,4 +124,5 @@ userSchema.pre("save", async function (next) {
 
 userSchema.index({ role: 1 });
 
-export const User = model<TUser, IUserModel>("User", userSchema);
+export const User = model<TUser, UserModel>("User", userSchema);
+
