@@ -10,18 +10,21 @@ const connectDB = async () => {
     return;
   }
   try {
+    if (!config.database_url) {
+      throw new Error("DATABASE_URL is not defined in environment variables!");
+    }
     await mongoose.connect(config.database_url as string);
     isConnected = true;
     console.log("🚀 Database connected successfully");
     await seedSuperAdmin();
   } catch (error) {
     console.error("Failed to connect Database", error);
+    throw error;
   }
 };
 
-app.use(async (req, res, next) => {
+export default async function handler(req: any, res: any) {
   await connectDB();
-  next();
-});
+  return app(req, res);
+}
 
-export default app;
