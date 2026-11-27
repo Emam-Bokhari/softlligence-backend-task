@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import { GENDER, STATUS, USER_ROLES } from "../../../enums/user";
+import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
 import { UserModel, TUser } from "./user.interface";
 
 import bcrypt from "bcrypt";
@@ -43,6 +44,21 @@ const userSchema = new Schema<TUser, UserModel>(
       type: String,
       enum: Object.values(STATUS),
       default: STATUS.ACTIVE,
+    },
+    tenantId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    subscriptionPlanId: {
+      type: Schema.Types.ObjectId,
+      ref: "SubscriptionPlan",
+      default: null,
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: Object.values(SUBSCRIPTION_STATUS),
+      default: null,
     },
     authentication: {
       type: {
@@ -123,6 +139,8 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.index({ role: 1 });
+userSchema.index({ tenantId: 1, isDeleted: 1 });
+
 
 export const User = model<TUser, UserModel>("User", userSchema);
 
