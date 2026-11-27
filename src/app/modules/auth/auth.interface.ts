@@ -7,10 +7,4 @@ export type TJwtPayload = {
   tenantId?: string;
 };
 
-export type ITenantRegisterData = {
-  name: string;
-  email: string;
-  password: string;
-  subscriptionPlanId: string;
-};
 

@@ -18,9 +18,6 @@ import { emailHelper } from "../../../helpers/emailHelper";
 import generateOTP from "../../../util/generateOTP";
 import { emailTemplate } from "../../../shared/emailTemplate";
 import { STATUS, USER_ROLES } from "../../../enums/user";
-import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
-import { SubscriptionPlan } from "../subscriptionPlan/subscriptionPlan.model";
-import { Types } from "mongoose";
 import { TUser } from "../user/user.interface";
 
 // ========================== Sign Up ===========================
@@ -41,21 +38,6 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     payload.role && Object.values(USER_ROLES).includes(payload.role as USER_ROLES)
       ? (payload.role as USER_ROLES)
       : USER_ROLES.TENANT;
-
-  // Validate subscription plan if provided
-  if (payload.subscriptionPlanId) {
-    const isPlanExist = await SubscriptionPlan.findOne({
-      _id: payload.subscriptionPlanId,
-      isActive: true,
-      isDeleted: { $ne: true },
-    });
-    if (!isPlanExist) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        "Selected subscription plan does not exist or is inactive!",
-      );
-    }
-  }
 
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -81,12 +63,6 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     password,
     role,
     gender: payload.gender,
-    subscriptionPlanId: payload.subscriptionPlanId
-      ? new Types.ObjectId(payload.subscriptionPlanId)
-      : undefined,
-    subscriptionStatus: payload.subscriptionPlanId
-      ? SUBSCRIPTION_STATUS.ACTIVE
-      : undefined,
     verified: false,
     status: STATUS.ACTIVE,
     authentication: {

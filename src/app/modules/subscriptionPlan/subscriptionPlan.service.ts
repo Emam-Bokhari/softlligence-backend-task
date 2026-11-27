@@ -4,6 +4,11 @@ import QueryBuilder from "../../builder/queryBuilder";
 import { SUBSCRIPTION_PLAN_SEARCHABLE_FIELDS } from "./subscriptionPlan.constant";
 import { TSubscriptionPlan } from "./subscriptionPlan.interface";
 import { SubscriptionPlan } from "./subscriptionPlan.model";
+import { JwtPayload } from "jsonwebtoken";
+import { User } from "../user/user.model";
+import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
+import { USER_ROLES } from "../../../enums/user";
+import { Types } from "mongoose";
 
 const createSubscriptionPlanToDB = async (
   payload: TSubscriptionPlan,
@@ -117,10 +122,96 @@ const deleteSubscriptionPlanFromDB = async (
   return result;
 };
 
+// =================== Direct Purchase / Subscribe ===================
+const purchaseSubscriptionPlanToDB = async (
+  currentUser: JwtPayload,
+  planId: string,
+) => {
+  const tenantId =
+    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+
+  if (!tenantId) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "Only tenants can purchase a subscription plan!",
+    );
+  }
+
+  // 1. Verify plan exists and is active
+  const plan = await SubscriptionPlan.findOne({
+    _id: planId,
+    isActive: true,
+    isDeleted: { $ne: true },
+  });
+
+  if (!plan) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      "Subscription plan not found or is currently inactive!",
+    );
+  }
+
+  // 2. Direct purchase: Update tenant with the active plan
+  const updatedTenant = await User.findOneAndUpdate(
+    { _id: tenantId },
+    {
+      subscriptionPlanId: new Types.ObjectId(planId),
+      subscriptionStatus: SUBSCRIPTION_STATUS.ACTIVE,
+    },
+    { new: true },
+  ).select("-password -authentication");
+
+  if (!updatedTenant) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tenant account not found!");
+  }
+
+  return {
+    tenant: updatedTenant,
+    plan,
+  };
+};
+
+const getMySubscriptionPlanFromDB = async (currentUser: JwtPayload) => {
+  const tenantId =
+    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+
+  if (!tenantId) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "No tenant associated with this account!",
+    );
+  }
+
+  const tenant = await User.findById(tenantId);
+  if (!tenant) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tenant not found!");
+  }
+
+  if (!tenant.subscriptionPlanId) {
+    return {
+      hasActiveSubscription: false,
+      message: "No subscription plan purchased yet.",
+      plan: null,
+      status: null,
+    };
+  }
+
+  const plan = await SubscriptionPlan.findById(tenant.subscriptionPlanId);
+
+  return {
+    hasActiveSubscription: tenant.subscriptionStatus === SUBSCRIPTION_STATUS.ACTIVE,
+    status: tenant.subscriptionStatus,
+    plan,
+  };
+};
+
 export const SubscriptionPlanService = {
   createSubscriptionPlanToDB,
   getAllSubscriptionPlansFromDB,
   getSubscriptionPlanByIdFromDB,
   updateSubscriptionPlanToDB,
   deleteSubscriptionPlanFromDB,
+  purchaseSubscriptionPlanToDB,
+  getMySubscriptionPlanFromDB,
 };
+

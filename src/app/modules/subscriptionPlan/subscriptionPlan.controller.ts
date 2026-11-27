@@ -79,10 +79,45 @@ const deleteSubscriptionPlan = catchAsync(
   },
 );
 
+const purchaseSubscriptionPlan = catchAsync(
+  async (req: Request, res: Response) => {
+    const { planId } = req.body;
+    const result = await SubscriptionPlanService.purchaseSubscriptionPlanToDB(
+      req.user,
+      planId,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Subscription plan purchased successfully",
+      data: result,
+    });
+  },
+);
+
+const getMySubscriptionPlan = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await SubscriptionPlanService.getMySubscriptionPlanFromDB(
+      req.user,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Current subscription plan retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 export const SubscriptionPlanController = {
   createSubscriptionPlan,
   getAllSubscriptionPlans,
   getSubscriptionPlanById,
   updateSubscriptionPlan,
   deleteSubscriptionPlan,
+  purchaseSubscriptionPlan,
+  getMySubscriptionPlan,
 };
+

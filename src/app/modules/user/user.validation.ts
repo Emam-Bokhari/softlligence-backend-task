@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { GENDER, STATUS } from "../../../enums/user";
-import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
 import { signUpBodyZodSchema } from "../auth/auth.validation";
 
 const createUserZodSchema = z.object({
@@ -44,18 +43,11 @@ const updateUserStatusZodSchema = z.object({
   }),
 });
 
-const updateTenantSubscriptionZodSchema = z.object({
-  body: z.object({
-    subscriptionPlanId: z.string().optional(),
-    subscriptionStatus: z.nativeEnum(SUBSCRIPTION_STATUS).optional(),
-  }),
-});
-
 export const UserValidation = {
   createUserZodSchema,
   createTeamMemberZodSchema,
   updateProfileZodSchema,
   updateUserStatusZodSchema,
-  updateTenantSubscriptionZodSchema,
 };
+
 

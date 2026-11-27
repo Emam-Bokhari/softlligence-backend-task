@@ -6,7 +6,6 @@ export type ISignUpData = {
   password: string;
   role?: USER_ROLES;
   gender?: GENDER;
-  subscriptionPlanId?: string;
   [key: string]: any;
 };
 

@@ -7,6 +7,23 @@ import { SubscriptionPlanValidation } from "./subscriptionPlan.validation";
 
 const router = express.Router();
 
+/* ---------------------------- TENANT PURCHASE & MY-PLAN ---------------- */
+router.post(
+  "/purchase",
+  auth(USER_ROLES.TENANT),
+  validateRequest(
+    SubscriptionPlanValidation.purchaseSubscriptionPlanZodSchema,
+  ),
+  SubscriptionPlanController.purchaseSubscriptionPlan,
+);
+
+router.get(
+  "/my-plan",
+  auth(USER_ROLES.TENANT, USER_ROLES.USER),
+  SubscriptionPlanController.getMySubscriptionPlan,
+);
+
+/* ---------------------------- PLAN CRUD & SUPER ADMIN ------------------ */
 router
   .route("/")
   .post(

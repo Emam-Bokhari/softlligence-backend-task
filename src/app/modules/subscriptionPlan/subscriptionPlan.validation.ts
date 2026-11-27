@@ -49,7 +49,17 @@ const updateSubscriptionPlanZodSchema = z.object({
   }),
 });
 
+const purchaseSubscriptionPlanZodSchema = z.object({
+  body: z.object({
+    planId: z.string({
+      required_error: "Plan ID is required to purchase a subscription",
+    }),
+  }),
+});
+
 export const SubscriptionPlanValidation = {
   createSubscriptionPlanZodSchema,
   updateSubscriptionPlanZodSchema,
+  purchaseSubscriptionPlanZodSchema,
 };
+
