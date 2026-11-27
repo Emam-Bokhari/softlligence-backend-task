@@ -39,3 +39,11 @@ export type IContractorInvitationEmail = {
   personalMessage?: string;
   loginUrl?: string;
 };
+
+export type ITeamMemberInvitationEmail = {
+  name: string;
+  email: string;
+  password: string;
+  tenantName: string;
+};
+

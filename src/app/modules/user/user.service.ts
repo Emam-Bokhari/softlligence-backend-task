@@ -13,6 +13,8 @@ import { AuthService } from "../auth/auth.service";
 import { ISignUpData } from "../../../types/auth";
 import { SubscriptionPlan } from "../subscriptionPlan/subscriptionPlan.model";
 import { Types } from "mongoose";
+import { emailHelper } from "../../../helpers/emailHelper";
+import { emailTemplate } from "../../../shared/emailTemplate";
 
 
 const createUserToDB = async (payload: ISignUpData) => {
@@ -104,6 +106,16 @@ const createTeamMemberToDB = async (
     verified: true,
     status: STATUS.ACTIVE,
   });
+
+  // send invitation email with credentials to the newly created team member
+  const emailValues = {
+    name: newMember.name,
+    email: newMember.email,
+    password: payload.password,
+    tenantName: tenant.name || "Your Organization",
+  };
+  const memberEmailTemplate = emailTemplate.teamMemberInvitation(emailValues);
+  emailHelper.sendEmail(memberEmailTemplate);
 
   return newMember;
 };

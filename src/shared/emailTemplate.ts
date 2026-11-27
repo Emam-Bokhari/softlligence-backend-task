@@ -2,6 +2,7 @@ import {
   IContractorInvitationEmail,
   ICreateAccount,
   IResetPassword,
+  ITeamMemberInvitationEmail,
   ITenantInvitationEmail,
 } from "../types/emailTemplate";
 
@@ -1166,6 +1167,82 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
   };
 };
 
+const teamMemberInvitation = (values: ITeamMemberInvitationEmail) => {
+  const content = `
+<h2
+style="
+margin:0 0 18px;
+font-size:24px;
+font-weight:700;
+color:${COLORS.text};
+"
+>
+Welcome to the Team, ${values.name}!
+</h2>
+
+<p
+style="
+margin:0;
+font-size:15px;
+line-height:1.8;
+color:${COLORS.secondary};
+"
+>
+You have been added as a team member under <b style="color:${COLORS.text};">${values.tenantName}</b> on LocalFix.
+You can now log in to your account using the credentials provided below:
+</p>
+
+<table
+width="100%"
+cellpadding="0"
+cellspacing="0"
+style="
+margin:28px 0;
+background:${COLORS.background};
+border:1px solid ${COLORS.border};
+border-radius:12px;
+">
+<tr>
+<td style="padding:20px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+<tr>
+<td style="padding:8px 0; color:${COLORS.secondary}; width:110px; font-weight:600;">Email:</td>
+<td style="padding:8px 0; color:${COLORS.text}; font-weight:600;">${values.email}</td>
+</tr>
+<tr>
+<td style="padding:8px 0; color:${COLORS.secondary}; font-weight:600;">Password:</td>
+<td style="padding:8px 0; color:${COLORS.primary}; font-weight:700; font-family:monospace; font-size:16px;">${values.password}</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
+  <p style="margin: 0; font-size: 13px; color: #1E40AF; line-height: 1.6;">
+    💡 <b>Security Tip:</b> For your security, we strongly recommend that you log in and change your password immediately from your profile settings.
+  </p>
+</div>
+
+<p
+style="
+margin:0;
+font-size:14px;
+line-height:1.8;
+color:${COLORS.secondary};
+"
+>
+If you believe this invitation was sent to you by mistake, please contact your administrator.
+</p>
+`;
+
+  return {
+    to: values.email,
+    subject: `Welcome to ${values.tenantName}'s team on LocalFix`,
+    html: baseLayout("Team Member Invitation", content),
+  };
+};
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
@@ -1174,4 +1251,5 @@ export const emailTemplate = {
   genericNotification,
   tenantInvitation,
   contractorInvitation,
+  teamMemberInvitation,
 };
