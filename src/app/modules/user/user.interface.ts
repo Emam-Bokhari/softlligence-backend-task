@@ -1,0 +1,34 @@
+import { Model, Types } from "mongoose";
+import {
+  GENDER,
+  STATUS,
+  USER_ROLES,
+} from "../../../enums/user";
+
+export type TUser = {
+  name: string;
+  role: USER_ROLES;
+  email: string;
+  password: string;
+  gender?: GENDER;
+  verified: boolean;
+  status: STATUS;
+  authentication?: {
+    isResetPassword?: boolean;
+    oneTimeCode?: number | null;
+    expireAt?: Date | null;
+    authType?: string | null;
+  };
+  isDeleted?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type UserModal = {
+  isExistUserById(id: string): Promise<TUser | null>;
+  isExistUserByEmail(email: string): Promise<TUser | null>;
+  isMatchPassword(password: string, hashPassword: string): Promise<boolean>;
+} & Model<TUser>;
+
+export type IUserModel = UserModal;
+export type IUser = TUser;
