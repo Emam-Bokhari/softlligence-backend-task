@@ -4,6 +4,7 @@ import {
   STATUS,
   USER_ROLES,
 } from "../../../enums/user";
+import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
 
 export type TUser = {
   name: string;
@@ -13,6 +14,9 @@ export type TUser = {
   gender?: GENDER;
   verified: boolean;
   status: STATUS;
+  tenantId?: Types.ObjectId;
+  subscriptionPlanId?: Types.ObjectId;
+  subscriptionStatus?: SUBSCRIPTION_STATUS;
   authentication?: {
     isResetPassword?: boolean;
     oneTimeCode?: number | null;
