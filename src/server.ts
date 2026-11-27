@@ -23,9 +23,11 @@ async function main() {
     const port =
       typeof config.port === "number" ? config.port : Number(config.port);
 
-    server = app.listen(port, config.ip_address as string, () => {
-      logger.info(`♻️  SassFlow API listening on port:${config.port}`);
-    });
+    if (!process.env.VERCEL) {
+      server = app.listen(port, config.ip_address as string, () => {
+        logger.info(`♻️  SassFlow API listening on port:${config.port}`);
+      });
+    }
   } catch (error) {
     errorLogger.error("🤢 Failed to connect Database", error);
   }
@@ -53,3 +55,6 @@ process.on("SIGTERM", () => {
     server.close();
   }
 });
+
+export default app;
+
