@@ -1,4 +1,6 @@
 import { STATUS, USER_ROLES } from "../../../enums/user";
+import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
+import config from "../../../config";
 import { TUser } from "./user.interface";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "./user.model";
@@ -44,26 +46,41 @@ const createTeamMemberToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Tenant not found!");
   }
 
-  // 2. Feature Gating: Check subscription plan limit for users
-  if (tenant.subscriptionPlanId) {
-    const plan = await SubscriptionPlan.findOne({
-      _id: tenant.subscriptionPlanId,
-      isActive: true,
+  // 2. Feature Gating: Subscription check & plan limit for users
+  if (
+    !tenant.subscriptionPlanId ||
+    tenant.subscriptionStatus !== SUBSCRIPTION_STATUS.ACTIVE
+  ) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "You must purchase an active subscription plan before adding team members!",
+    );
+  }
+
+  const plan = await SubscriptionPlan.findOne({
+    _id: tenant.subscriptionPlanId,
+    isActive: true,
+    isDeleted: { $ne: true },
+  });
+
+  if (!plan) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "Your subscription plan is invalid or inactive. Please contact support.",
+    );
+  }
+
+  if (plan?.features?.maxUsers) {
+    const currentMemberCount = await User.countDocuments({
+      tenantId: new Types.ObjectId(tenantId),
       isDeleted: { $ne: true },
     });
 
-    if (plan?.features?.maxUsers) {
-      const currentMemberCount = await User.countDocuments({
-        tenantId: new Types.ObjectId(tenantId),
-        isDeleted: { $ne: true },
-      });
-
-      if (currentMemberCount >= plan.features.maxUsers) {
-        throw new ApiError(
-          StatusCodes.FORBIDDEN,
-          `User limit reached! Your subscription plan allows a maximum of ${plan.features.maxUsers} users. Please upgrade your plan.`,
-        );
-      }
+    if (currentMemberCount >= plan.features.maxUsers) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        `User limit reached! Your subscription plan allows a maximum of ${plan.features.maxUsers} users. Please upgrade your plan.`,
+      );
     }
   }
 
@@ -93,15 +110,29 @@ const createTeamMemberToDB = async (
 };
 
 const getMyProfileFromDB = async (userId: string) => {
-  const result = await User.findById(userId).select(
-    "-password -authentication",
-  );
+  const result = await User.findById(userId)
+    .populate("subscriptionPlanId")
+    .select("-password -authentication");
 
   if (!result || result.isDeleted) {
     throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
   }
 
-  return result;
+  // If standard user, also attach their tenant's active plan for UI feature gating
+  let activePlan = result.subscriptionPlanId;
+  if (result.role === USER_ROLES.USER && result.tenantId) {
+    const tenant = await User.findById(result.tenantId).populate(
+      "subscriptionPlanId",
+    );
+    if (tenant?.subscriptionPlanId) {
+      activePlan = tenant.subscriptionPlanId;
+    }
+  }
+
+  return {
+    ...result.toObject(),
+    activePlan,
+  };
 };
 
 const updateProfileToDB = async (
@@ -162,17 +193,44 @@ const getUsersFromDB = async (
   };
 };
 
-const getUserByIdFromDB = async (id: string) => {
-  const user = await User.findById(id).select("-password -authentication");
+const getUserByIdFromDB = async (currentUser: JwtPayload, id: string) => {
+  const user = await User.findById(id)
+    .populate("subscriptionPlanId")
+    .select("-password -authentication");
 
   if (!user || user.isDeleted) {
     throw new ApiError(StatusCodes.NOT_FOUND, "No user is found by this ID");
   }
 
+  // Strict Multi-Tenant Isolation
+  if (currentUser.role === USER_ROLES.TENANT) {
+    const isSelf = user._id.toString() === currentUser.id;
+    const isMyMember = user.tenantId?.toString() === currentUser.id;
+    if (!isSelf && !isMyMember) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Access denied! This user does not belong to your organization.",
+      );
+    }
+  } else if (currentUser.role === USER_ROLES.USER) {
+    const isSelf = user._id.toString() === currentUser.id;
+    const isSameTenant = user.tenantId?.toString() === currentUser.tenantId;
+    if (!isSelf && !isSameTenant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Access denied! This user is outside your organization.",
+      );
+    }
+  }
+
   return user;
 };
 
-const updateUserStatusByIdToDB = async (id: string, status: STATUS) => {
+const updateUserStatusByIdToDB = async (
+  currentUser: JwtPayload,
+  id: string,
+  status: STATUS,
+) => {
   if (![STATUS.ACTIVE, STATUS.INACTIVE].includes(status)) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
@@ -183,6 +241,16 @@ const updateUserStatusByIdToDB = async (id: string, status: STATUS) => {
   const user = await User.findById(id);
   if (!user || user.isDeleted) {
     throw new ApiError(StatusCodes.NOT_FOUND, "No user is found by this ID");
+  }
+
+  // Strict Multi-Tenant Isolation: Tenant can only update members under their tenant
+  if (currentUser.role === USER_ROLES.TENANT) {
+    if (user.tenantId?.toString() !== currentUser.id) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You can only change the status of members within your own organization!",
+      );
+    }
   }
 
   const result = await User.findByIdAndUpdate(
@@ -198,10 +266,57 @@ const updateUserStatusByIdToDB = async (id: string, status: STATUS) => {
   return result;
 };
 
-const deleteUserByIdFromD = async (id: string) => {
+const updateTeamMemberByIdToDB = async (
+  currentUser: JwtPayload,
+  id: string,
+  payload: Record<string, any>,
+) => {
   const user = await User.findById(id);
   if (!user || user.isDeleted) {
     throw new ApiError(StatusCodes.NOT_FOUND, "User does not exist");
+  }
+
+  // Strict Multi-Tenant Isolation
+  if (currentUser.role === USER_ROLES.TENANT) {
+    if (user.tenantId?.toString() !== currentUser.id) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You can only update members within your own organization!",
+      );
+    }
+  }
+
+  const updatePayload: Record<string, any> = {};
+  if (payload.name) updatePayload.name = payload.name;
+  if (payload.gender) updatePayload.gender = payload.gender;
+  if (payload.password) {
+    updatePayload.password = await bcrypt.hash(
+      payload.password,
+      Number(config.bcrypt_salt_rounds),
+    );
+  }
+
+  const result = await User.findByIdAndUpdate(id, updatePayload, {
+    new: true,
+  }).select("-password -authentication");
+
+  return result;
+};
+
+const deleteUserByIdFromD = async (currentUser: JwtPayload, id: string) => {
+  const user = await User.findById(id);
+  if (!user || user.isDeleted) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "User does not exist");
+  }
+
+  // Strict Multi-Tenant Isolation: Tenant can only delete members under their tenant
+  if (currentUser.role === USER_ROLES.TENANT) {
+    if (user.tenantId?.toString() !== currentUser.id) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You can only delete members within your own organization!",
+      );
+    }
   }
 
   const result = await User.findByIdAndUpdate(
@@ -212,6 +327,48 @@ const deleteUserByIdFromD = async (id: string) => {
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete user");
   }
+
+  return result;
+};
+
+const updateTenantSubscriptionByAdminToDB = async (
+  tenantId: string,
+  subscriptionPlanId: string,
+  subscriptionStatus?: SUBSCRIPTION_STATUS,
+) => {
+  const tenant = await User.findOne({
+    _id: tenantId,
+    role: USER_ROLES.TENANT,
+    isDeleted: { $ne: true },
+  });
+
+  if (!tenant) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tenant account not found!");
+  }
+
+  const plan = await SubscriptionPlan.findOne({
+    _id: subscriptionPlanId,
+    isActive: true,
+    isDeleted: { $ne: true },
+  });
+
+  if (!plan) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      "Subscription plan not found or inactive!",
+    );
+  }
+
+  const result = await User.findByIdAndUpdate(
+    tenantId,
+    {
+      subscriptionPlanId: new Types.ObjectId(subscriptionPlanId),
+      subscriptionStatus: subscriptionStatus || SUBSCRIPTION_STATUS.ACTIVE,
+    },
+    { new: true },
+  )
+    .populate("subscriptionPlanId")
+    .select("-password -authentication");
 
   return result;
 };
@@ -248,7 +405,9 @@ export const UserService = {
   getUserByIdFromDB,
   getMyProfileFromDB,
   updateProfileToDB,
+  updateTeamMemberByIdToDB,
   updateUserStatusByIdToDB,
+  updateTenantSubscriptionByAdminToDB,
   deleteUserByIdFromD,
   deleteProfileFromDB,
 };

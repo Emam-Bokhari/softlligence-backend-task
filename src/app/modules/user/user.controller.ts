@@ -70,7 +70,7 @@ const getUsers = catchAsync(async (req: Request, res: Response) => {
 
 const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await UserService.getUserByIdFromDB(id);
+  const result = await UserService.getUserByIdFromDB(req.user, id);
 
   sendResponse(res, {
     success: true,
@@ -84,7 +84,11 @@ const updateUserStatusById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const status = (req.body?.status || STATUS.INACTIVE) as STATUS;
 
-  const result = await UserService.updateUserStatusByIdToDB(id, status);
+  const result = await UserService.updateUserStatusByIdToDB(
+    req.user,
+    id,
+    status,
+  );
 
   sendResponse(res, {
     success: true,
@@ -94,10 +98,43 @@ const updateUserStatusById = catchAsync(async (req, res) => {
   });
 });
 
+const updateTeamMember = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await UserService.updateTeamMemberByIdToDB(
+    req.user,
+    id,
+    req.body,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Team member updated successfully",
+    data: result,
+  });
+});
+
+const updateTenantSubscriptionByAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { subscriptionPlanId, subscriptionStatus } = req.body;
+  const result = await UserService.updateTenantSubscriptionByAdminToDB(
+    id,
+    subscriptionPlanId,
+    subscriptionStatus,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Tenant subscription updated successfully by Super Admin",
+    data: result,
+  });
+});
+
 const deleteUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
 
-  const result = await UserService.deleteUserByIdFromD(id);
+  const result = await UserService.deleteUserByIdFromD(req.user, id);
 
   sendResponse(res, {
     success: true,
@@ -137,8 +174,10 @@ export const UserController = {
   createTeamMember,
   getUsers,
   updateProfile,
+  updateTeamMember,
   getUserById,
   updateUserStatusById,
+  updateTenantSubscriptionByAdmin,
   getMyProfile,
   deleteUserById,
   deleteProfile,

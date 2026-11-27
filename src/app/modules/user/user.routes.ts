@@ -43,15 +43,32 @@ router.post(
 
 router.patch(
   "/status/:id",
-  isAdmin,
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT),
   validateRequest(UserValidation.updateUserStatusZodSchema),
   UserController.updateUserStatusById,
+);
+
+router.patch(
+  "/:id/subscription",
+  auth(USER_ROLES.SUPER_ADMIN),
+  UserController.updateTenantSubscriptionByAdmin,
 );
 
 /* ---------------------------- DYNAMIC USER ID ROUTES (KEEP LAST!) ------- */
 router
   .route("/:id")
-  .get(isAdmin, UserController.getUserById)
-  .delete(isAdmin, UserController.deleteUserById);
+  .get(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT),
+    UserController.getUserById,
+  )
+  .patch(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT),
+    validateRequest(UserValidation.updateProfileZodSchema),
+    UserController.updateTeamMember,
+  )
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT),
+    UserController.deleteUserById,
+  );
 
 export const UserRoutes = router;

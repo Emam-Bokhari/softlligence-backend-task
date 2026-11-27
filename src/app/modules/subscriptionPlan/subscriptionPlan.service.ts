@@ -6,6 +6,7 @@ import { TSubscriptionPlan } from "./subscriptionPlan.interface";
 import { SubscriptionPlan } from "./subscriptionPlan.model";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "../user/user.model";
+import { Project } from "../project/project.model";
 import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
 import { USER_ROLES } from "../../../enums/user";
 import { Types } from "mongoose";
@@ -198,10 +199,38 @@ const getMySubscriptionPlanFromDB = async (currentUser: JwtPayload) => {
 
   const plan = await SubscriptionPlan.findById(tenant.subscriptionPlanId);
 
+  // Compute live resource usage for tenant
+  const [currentUsersCount, currentProjectsCount] = await Promise.all([
+    User.countDocuments({
+      tenantId: new Types.ObjectId(tenantId),
+      isDeleted: { $ne: true },
+    }),
+    Project.countDocuments({
+      tenantId: new Types.ObjectId(tenantId),
+      isDeleted: { $ne: true },
+    }),
+  ]);
+
+  const maxUsers = plan?.features?.maxUsers || 0;
+  const maxProjects = plan?.features?.maxProjects || 0;
+
   return {
-    hasActiveSubscription: tenant.subscriptionStatus === SUBSCRIPTION_STATUS.ACTIVE,
+    hasActiveSubscription:
+      tenant.subscriptionStatus === SUBSCRIPTION_STATUS.ACTIVE,
     status: tenant.subscriptionStatus,
     plan,
+    usage: {
+      users: {
+        used: currentUsersCount,
+        max: maxUsers,
+        remaining: Math.max(0, maxUsers - currentUsersCount),
+      },
+      projects: {
+        used: currentProjectsCount,
+        max: maxProjects,
+        remaining: Math.max(0, maxProjects - currentProjectsCount),
+      },
+    },
   };
 };
 

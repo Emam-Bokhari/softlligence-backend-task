@@ -1,11 +1,18 @@
 import express from "express";
 import auth from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
+import { checkModuleAccess } from "../../middlewares/checkModuleAccess";
 import { USER_ROLES } from "../../../enums/user";
 import { ProjectController } from "./project.controller";
 import { ProjectValidation } from "./project.validation";
 
 const router = express.Router();
+
+/* Feature Gate: Require authentication & active plan with projects module enabled */
+router.use(
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT, USER_ROLES.USER),
+  checkModuleAccess("projects"),
+);
 
 /* ---------------------------- PROGRESS UPDATE ---------------------------- */
 router.patch(
