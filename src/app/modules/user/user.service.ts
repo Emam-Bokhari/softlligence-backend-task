@@ -1,4 +1,4 @@
-import { STATUS } from "../../../enums/user";
+import { STATUS, USER_ROLES } from "../../../enums/user";
 import { TUser } from "./user.interface";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "./user.model";
@@ -9,10 +9,87 @@ import bcrypt from "bcrypt";
 import { USER_SEARCHABLE_FIELDS } from "./user.constant";
 import { AuthService } from "../auth/auth.service";
 import { ISignUpData } from "../../../types/auth";
+import { SubscriptionPlan } from "../subscriptionPlan/subscriptionPlan.model";
+import { Types } from "mongoose";
 
 // --- USER SERVICES ---
 const createUserToDB = async (payload: ISignUpData) => {
   return await AuthService.signUpUserToDB(payload);
+};
+
+const createTeamMemberToDB = async (
+  currentUser: JwtPayload,
+  payload: Record<string, any>,
+) => {
+  const tenantId =
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : payload.tenantId || currentUser.tenantId;
+
+  if (!tenantId) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Tenant ID is required to create a team member!",
+    );
+  }
+
+  // 1. Fetch Tenant details
+  const tenant = await User.findOne({
+    _id: tenantId,
+    role: USER_ROLES.TENANT,
+    isDeleted: { $ne: true },
+  });
+
+  if (!tenant) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tenant not found!");
+  }
+
+  // 2. Feature Gating: Check subscription plan limit for users
+  if (tenant.subscriptionPlanId) {
+    const plan = await SubscriptionPlan.findOne({
+      _id: tenant.subscriptionPlanId,
+      isActive: true,
+      isDeleted: { $ne: true },
+    });
+
+    if (plan?.features?.maxUsers) {
+      const currentMemberCount = await User.countDocuments({
+        tenantId: new Types.ObjectId(tenantId),
+        isDeleted: { $ne: true },
+      });
+
+      if (currentMemberCount >= plan.features.maxUsers) {
+        throw new ApiError(
+          StatusCodes.FORBIDDEN,
+          `User limit reached! Your subscription plan allows a maximum of ${plan.features.maxUsers} users. Please upgrade your plan.`,
+        );
+      }
+    }
+  }
+
+  // 3. Check email uniqueness
+  const normalizedEmail = payload.email.trim().toLowerCase();
+  const isExistUser = await User.findOne({ email: normalizedEmail });
+  if (isExistUser) {
+    throw new ApiError(
+      StatusCodes.CONFLICT,
+      "A user with this email already exists!",
+    );
+  }
+
+  // 4. Create user under this tenant
+  const newMember = await User.create({
+    name: payload.name.trim(),
+    email: normalizedEmail,
+    password: payload.password,
+    role: USER_ROLES.USER,
+    gender: payload.gender,
+    tenantId: new Types.ObjectId(tenantId),
+    verified: true,
+    status: STATUS.ACTIVE,
+  });
+
+  return newMember;
 };
 
 const getMyProfileFromDB = async (userId: string) => {
@@ -49,11 +126,23 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
-const getUsersFromDB = async (query: Record<string, unknown>) => {
+const getUsersFromDB = async (
+  currentUser: JwtPayload,
+  query: Record<string, unknown>,
+) => {
   const queryObj = { ...query };
 
+  // Strict Multi-Tenant Query Isolation:
+  const filterConditions: Record<string, any> = { isDeleted: { $ne: true } };
+
+  if (currentUser.role === USER_ROLES.TENANT) {
+    filterConditions.tenantId = new Types.ObjectId(currentUser.id);
+  } else if (currentUser.role === USER_ROLES.USER) {
+    filterConditions.tenantId = new Types.ObjectId(currentUser.tenantId);
+  }
+
   const queryBuilder = new QueryBuilder(
-    User.find({ isDeleted: { $ne: true } }).select("-password -authentication") as any,
+    User.find(filterConditions).select("-password -authentication") as any,
     queryObj,
   )
     .search(USER_SEARCHABLE_FIELDS)
@@ -154,6 +243,7 @@ const deleteProfileFromDB = async (id: string, password?: string) => {
 
 export const UserService = {
   createUserToDB,
+  createTeamMemberToDB,
   getUsersFromDB,
   getUserByIdFromDB,
   getMyProfileFromDB,

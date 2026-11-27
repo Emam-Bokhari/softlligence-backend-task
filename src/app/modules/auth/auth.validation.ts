@@ -19,8 +19,9 @@ export const signUpBodyZodSchema = z
     role: z
       .nativeEnum(USER_ROLES)
       .optional()
-      .default(USER_ROLES.USER),
+      .default(USER_ROLES.TENANT),
     gender: z.nativeEnum(GENDER).optional(),
+    subscriptionPlanId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (

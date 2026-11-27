@@ -52,8 +52,14 @@ const auth =
           throw new ApiError(StatusCodes.FORBIDDEN, "This user is blocked !!");
         }
 
-        // Attach database role to verified user info
+        // Attach database role and tenantId to verified user info
         verifyUser.role = user.role;
+        verifyUser.tenantId =
+          user.role === USER_ROLES.TENANT
+            ? verifyUser.id
+            : (user as any).tenantId
+              ? (user as any).tenantId.toString()
+              : undefined;
 
         //guard user role
         if (roles.length && !roles.includes(verifyUser.role)) {

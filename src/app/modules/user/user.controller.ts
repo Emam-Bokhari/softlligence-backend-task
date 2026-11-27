@@ -21,6 +21,18 @@ const createUser = catchAsync(
   },
 );
 
+// create team member by tenant
+const createTeamMember = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.createTeamMemberToDB(req.user, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: "Team member created successfully",
+    data: result,
+  });
+});
+
 // update profile
 const updateProfile = catchAsync(async (req, res) => {
   const user: any = req.user;
@@ -45,7 +57,7 @@ const updateProfile = catchAsync(async (req, res) => {
 });
 
 const getUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserService.getUsersFromDB(req.query);
+  const result = await UserService.getUsersFromDB(req.user, req.query);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -122,6 +134,7 @@ const deleteProfile = catchAsync(async (req, res) => {
 
 export const UserController = {
   createUser,
+  createTeamMember,
   getUsers,
   updateProfile,
   getUserById,

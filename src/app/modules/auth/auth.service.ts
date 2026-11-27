@@ -18,6 +18,9 @@ import { emailHelper } from "../../../helpers/emailHelper";
 import generateOTP from "../../../util/generateOTP";
 import { emailTemplate } from "../../../shared/emailTemplate";
 import { STATUS, USER_ROLES } from "../../../enums/user";
+import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
+import { SubscriptionPlan } from "../subscriptionPlan/subscriptionPlan.model";
+import { Types } from "mongoose";
 import { TUser } from "../user/user.interface";
 
 // ========================== Sign Up ===========================
@@ -37,7 +40,22 @@ const signUpUserToDB = async (payload: ISignUpData) => {
   const role =
     payload.role && Object.values(USER_ROLES).includes(payload.role as USER_ROLES)
       ? (payload.role as USER_ROLES)
-      : USER_ROLES.USER;
+      : USER_ROLES.TENANT;
+
+  // Validate subscription plan if provided
+  if (payload.subscriptionPlanId) {
+    const isPlanExist = await SubscriptionPlan.findOne({
+      _id: payload.subscriptionPlanId,
+      isActive: true,
+      isDeleted: { $ne: true },
+    });
+    if (!isPlanExist) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Selected subscription plan does not exist or is inactive!",
+      );
+    }
+  }
 
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -63,6 +81,12 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     password,
     role,
     gender: payload.gender,
+    subscriptionPlanId: payload.subscriptionPlanId
+      ? new Types.ObjectId(payload.subscriptionPlanId)
+      : undefined,
+    subscriptionStatus: payload.subscriptionPlanId
+      ? SUBSCRIPTION_STATUS.ACTIVE
+      : undefined,
     verified: false,
     status: STATUS.ACTIVE,
     authentication: {
@@ -151,12 +175,21 @@ const loginUserFromDB = async (payload: ILoginData) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Password is incorrect!");
   }
 
+  // determine tenantId for isolation
+  const tenantId =
+    isExistUser.role === USER_ROLES.TENANT
+      ? isExistUser._id.toString()
+      : isExistUser.tenantId
+        ? isExistUser.tenantId.toString()
+        : undefined;
+
   // create access token
   const createToken = jwtHelper.createToken(
     {
       id: isExistUser._id,
       role: isExistUser.role,
       email: isExistUser.email,
+      tenantId,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expire_in as string,
@@ -168,6 +201,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
       id: isExistUser._id,
       role: isExistUser.role,
       email: isExistUser.email,
+      tenantId,
     },
     config.jwt.jwtRefreshSecret as Secret,
     config.jwt.jwtRefreshExpiresIn || "30d",
@@ -263,11 +297,19 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       { new: true },
     );
 
+    const tenantId =
+      isExistUser.role === USER_ROLES.TENANT
+        ? isExistUser._id.toString()
+        : isExistUser.tenantId
+          ? isExistUser.tenantId.toString()
+          : undefined;
+
     const token = jwtHelper.createToken(
       {
         id: isExistUser._id,
         role: isExistUser.role,
         email: isExistUser.email,
+        tenantId,
       },
       config.jwt.jwt_secret as Secret,
       config.jwt.jwt_expire_in as string,
@@ -278,6 +320,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
         id: isExistUser._id,
         role: isExistUser.role,
         email: isExistUser.email,
+        tenantId,
       },
       config.jwt.jwtRefreshSecret as Secret,
       config.jwt.jwtRefreshExpiresIn || "30d",
@@ -452,11 +495,19 @@ const newAccessTokenToUser = async (token: string) => {
     throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access!");
   }
 
+  const tenantId =
+    isExistUser.role === USER_ROLES.TENANT
+      ? isExistUser._id.toString()
+      : isExistUser.tenantId
+        ? isExistUser.tenantId.toString()
+        : undefined;
+
   const accessToken = jwtHelper.createToken(
     {
       id: isExistUser._id,
       role: isExistUser.role,
       email: isExistUser.email,
+      tenantId,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expire_in as string,
