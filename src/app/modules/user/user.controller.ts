@@ -7,7 +7,7 @@ import sendResponse from "../../../shared/sendResponse";
 import config from "../../../config";
 import { STATUS } from "../../../enums/user";
 
-// register user
+
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const result = await UserService.createUserToDB(req.body);
@@ -21,7 +21,7 @@ const createUser = catchAsync(
   },
 );
 
-// create team member by tenant
+
 const createTeamMember = catchAsync(async (req: Request, res: Response) => {
   const result = await UserService.createTeamMemberToDB(req.user, req.body);
 
@@ -33,7 +33,7 @@ const createTeamMember = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// update profile
+
 const updateProfile = catchAsync(async (req, res) => {
   const user: any = req.user;
   if ("role" in req.body) {

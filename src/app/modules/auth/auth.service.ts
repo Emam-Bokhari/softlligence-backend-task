@@ -20,7 +20,7 @@ import { emailTemplate } from "../../../shared/emailTemplate";
 import { STATUS, USER_ROLES } from "../../../enums/user";
 import { TUser } from "../user/user.interface";
 
-// ========================== Sign Up ===========================
+
 const signUpUserToDB = async (payload: ISignUpData) => {
   const { email, password, name } = payload;
 
@@ -42,7 +42,7 @@ const signUpUserToDB = async (payload: ISignUpData) => {
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Check if user already exists
+  // check if user already exists
   const isExistUser = await User.findOne({ email: normalizedEmail });
   if (isExistUser) {
     if (isExistUser.verified) {
@@ -51,11 +51,11 @@ const signUpUserToDB = async (payload: ISignUpData) => {
         "This email is already registered!",
       );
     }
-    // Remove stale unverified user to allow clean re-registration
+    // remove stale unverified user to allow clean re-registration
     await User.deleteOne({ _id: isExistUser._id });
   }
 
-  // Generate 6-digit OTP
+  // generate 6-digit OTP
   const otp = generateOTP();
 
   const baseUserPayload: Partial<TUser> = {
@@ -82,7 +82,7 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     );
   }
 
-  // Send verification email
+  // send verification email
   const emailValues = {
     name: newUser.name,
     otp: Number(otp),
@@ -91,7 +91,7 @@ const signUpUserToDB = async (payload: ISignUpData) => {
   const accountEmailTemplate = emailTemplate.createAccount(emailValues);
   emailHelper.sendEmail(accountEmailTemplate);
 
-  // Generate token
+  // generate token
   const token = jwtHelper.createToken(
     {
       id: newUser._id,
@@ -114,7 +114,7 @@ const signUpUserToDB = async (payload: ISignUpData) => {
   };
 };
 
-// ========================== Login ===========================
+
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
   const cleanInput = email ? email.trim() : "";
@@ -191,7 +191,6 @@ const loginUserFromDB = async (payload: ILoginData) => {
   };
 };
 
-// ========================== Forget Password ===========================
 const forgetPasswordToDB = async (email: string) => {
   const normalizedEmail = email?.trim().toLowerCase();
   const isExistUser = await User.findOne({ email: normalizedEmail });
@@ -222,7 +221,7 @@ const forgetPasswordToDB = async (email: string) => {
   return { message: "A password reset OTP has been sent to your email." };
 };
 
-// ========================== Verify Email / OTP ===========================
+
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
   const normalizedEmail = email?.trim().toLowerCase();
@@ -260,7 +259,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   let data;
 
   if (!isExistUser.verified) {
-    // Signup verification flow
+    // signup verification flow
     const updatedUser = await User.findOneAndUpdate(
       { _id: isExistUser._id },
       {
@@ -310,7 +309,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       user: updatedUser,
     };
   } else {
-    // Forgot password flow
+    // forgot password flow
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
       {
@@ -337,7 +336,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   return { data, message };
 };
 
-// ========================== Reset Password ===========================
+
 const resetPasswordToDB = async (
   token: string,
   payload: IAuthResetPassword,
@@ -405,7 +404,7 @@ const resetPasswordToDB = async (
   return { message: "Password reset successfully." };
 };
 
-// ========================== Change Password ===========================
+
 const changePasswordToDB = async (
   user: JwtPayload,
   payload: IChangePassword,
@@ -456,7 +455,7 @@ const changePasswordToDB = async (
   );
 };
 
-// ========================== Refresh Access Token ===========================
+
 const newAccessTokenToUser = async (token: string) => {
   if (!token) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Refresh token is required!");
@@ -493,7 +492,7 @@ const newAccessTokenToUser = async (token: string) => {
   return { accessToken };
 };
 
-// ========================== Resend Verification OTP ===========================
+
 const resendVerificationEmailToDB = async (email: string) => {
   if (!email) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Email is required!");
@@ -545,7 +544,7 @@ const resendVerificationEmailToDB = async (email: string) => {
   };
 };
 
-// ========================== Delete User Account ===========================
+
 const deleteUserFromDB = async (user: JwtPayload, password?: string) => {
   const isExistUser = await User.findById(user.id).select("+password");
   if (!isExistUser) {

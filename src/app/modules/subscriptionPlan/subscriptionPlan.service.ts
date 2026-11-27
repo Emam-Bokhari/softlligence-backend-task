@@ -84,7 +84,7 @@ const updateSubscriptionPlanToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Subscription plan not found!");
   }
 
-  // Handle nested features update if provided
+  // handle nested features update if provided
   const updatePayload: Record<string, any> = { ...payload };
   if (payload.features) {
     Object.keys(payload.features).forEach((key) => {
@@ -123,7 +123,6 @@ const deleteSubscriptionPlanFromDB = async (
   return result;
 };
 
-// =================== Direct Purchase / Subscribe ===================
 const purchaseSubscriptionPlanToDB = async (
   currentUser: JwtPayload,
   planId: string,
@@ -140,7 +139,7 @@ const purchaseSubscriptionPlanToDB = async (
     );
   }
 
-  // 1. Verify plan exists and is active
+  // verify plan exists and is active
   const plan = await SubscriptionPlan.findOne({
     _id: planId,
     isActive: true,
@@ -154,7 +153,6 @@ const purchaseSubscriptionPlanToDB = async (
     );
   }
 
-  // 2. Direct purchase: Update tenant with the active plan
   const updatedTenant = await User.findOneAndUpdate(
     { _id: tenantId },
     {
@@ -243,7 +241,7 @@ const getMySubscriptionPlanFromDB = async (currentUser: JwtPayload) => {
 
   const plan = await SubscriptionPlan.findById(tenant.subscriptionPlanId);
 
-  // Compute live resource usage for tenant
+  // compute live resource usage for tenant
   const [currentUsersCount, currentProjectsCount] = await Promise.all([
     User.countDocuments({
       tenantId: new Types.ObjectId(tenantId),

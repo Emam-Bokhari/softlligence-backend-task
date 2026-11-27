@@ -15,12 +15,11 @@ export const checkModuleAccess =
         throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access!");
       }
 
-      // Super Admin has unrestricted access to all modules
+      // super admin has unrestricted access to all modules
       if (currentUser.role === USER_ROLES.SUPER_ADMIN) {
         return next();
       }
 
-      // Determine tenantId
       const tenantId =
         currentUser.role === USER_ROLES.TENANT
           ? currentUser.id

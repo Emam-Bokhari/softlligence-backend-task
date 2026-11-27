@@ -109,7 +109,7 @@ const userSchema = new Schema<TUser, UserModel>(
   },
 );
 
-// exist user check
+
 userSchema.statics.isExistUserById = async (id: string) => {
   return await User.findOne({ _id: id, isDeleted: { $ne: true } });
 };
@@ -118,7 +118,7 @@ userSchema.statics.isExistUserByEmail = async (email: string) => {
   return await User.findOne({ email, isDeleted: { $ne: true } });
 };
 
-// is match password
+
 userSchema.statics.isMatchPassword = async (
   password: string,
   hashPassword: string,
@@ -126,7 +126,6 @@ userSchema.statics.isMatchPassword = async (
   return await bcrypt.compare(password, hashPassword);
 };
 
-// hash password pre-save
 userSchema.pre("save", async function (next) {
   if (this.isModified("password") && this.password) {
     this.password = await bcrypt.hash(

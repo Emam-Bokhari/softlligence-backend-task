@@ -8,7 +8,7 @@ import { isAdmin, isAuthenticated } from "../../../helpers/authHelper";
 
 const router = express.Router();
 
-/* ---------------------------- PROFILE ROUTES ---------------------------- */
+
 router
   .route("/profile")
   .get(isAuthenticated, UserController.getMyProfile)
@@ -19,7 +19,7 @@ router
   )
   .delete(isAuthenticated, UserController.deleteProfile);
 
-/* ---------------------------- USER CREATE & LIST ------------------------ */
+
 router
   .route("/")
   .get(
@@ -51,7 +51,6 @@ router.patch(
   UserController.updateTenantSubscriptionByAdmin,
 );
 
-/* ---------------------------- DYNAMIC USER ID ROUTES (KEEP LAST!) ------- */
 router
   .route("/:id")
   .get(

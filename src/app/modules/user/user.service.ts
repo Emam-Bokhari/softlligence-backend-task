@@ -14,7 +14,7 @@ import { ISignUpData } from "../../../types/auth";
 import { SubscriptionPlan } from "../subscriptionPlan/subscriptionPlan.model";
 import { Types } from "mongoose";
 
-// --- USER SERVICES ---
+
 const createUserToDB = async (payload: ISignUpData) => {
   return await AuthService.signUpUserToDB(payload);
 };
@@ -35,7 +35,7 @@ const createTeamMemberToDB = async (
     );
   }
 
-  // 1. Fetch Tenant details
+
   const tenant = await User.findOne({
     _id: tenantId,
     role: USER_ROLES.TENANT,
@@ -46,7 +46,7 @@ const createTeamMemberToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Tenant not found!");
   }
 
-  // 2. Feature Gating: Subscription check & plan limit for users
+
   if (
     !tenant.subscriptionPlanId ||
     tenant.subscriptionStatus !== SUBSCRIPTION_STATUS.ACTIVE
@@ -84,7 +84,7 @@ const createTeamMemberToDB = async (
     }
   }
 
-  // 3. Check email uniqueness
+
   const normalizedEmail = payload.email.trim().toLowerCase();
   const isExistUser = await User.findOne({ email: normalizedEmail });
   if (isExistUser) {
@@ -94,7 +94,6 @@ const createTeamMemberToDB = async (
     );
   }
 
-  // 4. Create user under this tenant
   const newMember = await User.create({
     name: payload.name.trim(),
     email: normalizedEmail,
@@ -118,7 +117,6 @@ const getMyProfileFromDB = async (userId: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
   }
 
-  // If standard user, also attach their tenant's active plan for UI feature gating
   let activePlan = result.subscriptionPlanId;
   if (result.role === USER_ROLES.USER && result.tenantId) {
     const tenant = await User.findById(result.tenantId).populate(
@@ -163,7 +161,7 @@ const getUsersFromDB = async (
 ) => {
   const queryObj = { ...query };
 
-  // Strict Multi-Tenant Query Isolation:
+
   const filterConditions: Record<string, any> = { isDeleted: { $ne: true } };
 
   if (currentUser.role === USER_ROLES.TENANT) {
@@ -202,7 +200,7 @@ const getUserByIdFromDB = async (currentUser: JwtPayload, id: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No user is found by this ID");
   }
 
-  // Strict Multi-Tenant Isolation
+ 
   if (currentUser.role === USER_ROLES.TENANT) {
     const isSelf = user._id.toString() === currentUser.id;
     const isMyMember = user.tenantId?.toString() === currentUser.id;
@@ -243,7 +241,6 @@ const updateUserStatusByIdToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "No user is found by this ID");
   }
 
-  // Strict Multi-Tenant Isolation: Tenant can only update members under their tenant
   if (currentUser.role === USER_ROLES.TENANT) {
     if (user.tenantId?.toString() !== currentUser.id) {
       throw new ApiError(
@@ -276,7 +273,6 @@ const updateTeamMemberByIdToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "User does not exist");
   }
 
-  // Strict Multi-Tenant Isolation
   if (currentUser.role === USER_ROLES.TENANT) {
     if (user.tenantId?.toString() !== currentUser.id) {
       throw new ApiError(
@@ -309,7 +305,6 @@ const deleteUserByIdFromD = async (currentUser: JwtPayload, id: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "User does not exist");
   }
 
-  // Strict Multi-Tenant Isolation: Tenant can only delete members under their tenant
   if (currentUser.role === USER_ROLES.TENANT) {
     if (user.tenantId?.toString() !== currentUser.id) {
       throw new ApiError(

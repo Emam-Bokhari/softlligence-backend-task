@@ -8,13 +8,13 @@ import { ProjectValidation } from "./project.validation";
 
 const router = express.Router();
 
-/* Feature Gate: Require authentication & active plan with projects module enabled */
+
 router.use(
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT, USER_ROLES.USER),
   checkModuleAccess("projects"),
 );
 
-/* ---------------------------- PROGRESS UPDATE ---------------------------- */
+
 router.patch(
   "/:id/progress",
   auth(USER_ROLES.TENANT, USER_ROLES.USER),
@@ -22,7 +22,7 @@ router.patch(
   ProjectController.updateProjectProgress,
 );
 
-/* ---------------------------- PROJECT CRUD ------------------------------- */
+
 router
   .route("/")
   .post(

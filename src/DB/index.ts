@@ -73,7 +73,7 @@ const seedSuperAdmin = async () => {
     logger.info("✔ Super Admin already exists.");
   }
 
-  // Seed default subscription plans if none exist
+  // seed default subscription plans if none exist
   const existingPlansCount = await SubscriptionPlan.countDocuments({
     isDeleted: { $ne: true },
   });

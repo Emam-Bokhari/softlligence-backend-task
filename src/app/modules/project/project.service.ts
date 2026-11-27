@@ -12,7 +12,7 @@ import { PROJECT_SEARCHABLE_FIELDS } from "./project.constant";
 import { TProject } from "./project.interface";
 import { Project } from "./project.model";
 
-// ======================= Create Project =======================
+
 const createProjectToDB = async (
   currentUser: JwtPayload,
   payload: Partial<TProject>,
@@ -29,7 +29,7 @@ const createProjectToDB = async (
     );
   }
 
-  // 1. Fetch Tenant details
+
   const tenant = await User.findOne({
     _id: tenantId,
     role: USER_ROLES.TENANT,
@@ -40,7 +40,7 @@ const createProjectToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Tenant account not found!");
   }
 
-  // 2. Feature Gating: Subscription check
+
   if (
     !tenant.subscriptionPlanId ||
     tenant.subscriptionStatus !== SUBSCRIPTION_STATUS.ACTIVE
@@ -64,7 +64,7 @@ const createProjectToDB = async (
     );
   }
 
-  // Check allowed modules
+
   if (
     plan.features?.allowedModules &&
     !plan.features.allowedModules.includes("projects")
@@ -75,7 +75,7 @@ const createProjectToDB = async (
     );
   }
 
-  // Check maxProjects limit
+
   if (plan.features?.maxProjects) {
     const existingProjectsCount = await Project.countDocuments({
       tenantId: new Types.ObjectId(tenantId),
@@ -90,7 +90,7 @@ const createProjectToDB = async (
     }
   }
 
-  // 3. Validate assigned users belong to this tenant
+
   if (payload.assignedUsers && payload.assignedUsers.length > 0) {
     const validUsersCount = await User.countDocuments({
       _id: { $in: payload.assignedUsers },
@@ -106,7 +106,7 @@ const createProjectToDB = async (
     }
   }
 
-  // 4. Create project with strict tenantId scoping
+ 
   const projectData = {
     ...payload,
     tenantId: new Types.ObjectId(tenantId),
@@ -118,25 +118,24 @@ const createProjectToDB = async (
   return result;
 };
 
-// ======================= Get All Projects =======================
 const getAllProjectsFromDB = async (
   currentUser: JwtPayload,
   query: Record<string, unknown>,
 ) => {
   const queryObj = { ...query };
 
-  // Strict Multi-Tenant Query Scoping:
+  // strict Multi-Tenant Query Scoping:
   const filterConditions: Record<string, any> = { isDeleted: { $ne: true } };
 
   if (currentUser.role === USER_ROLES.TENANT) {
-    // Tenant sees all projects belonging to their organization
+    // tenant sees all projects belonging to their organization
     filterConditions.tenantId = new Types.ObjectId(currentUser.id);
   } else if (currentUser.role === USER_ROLES.USER) {
-    // Standard User only sees projects assigned to them under their tenant
+    // standard User only sees projects assigned to them under their tenant
     filterConditions.tenantId = new Types.ObjectId(currentUser.tenantId);
     filterConditions.assignedUsers = new Types.ObjectId(currentUser.id);
   } else if (currentUser.role === USER_ROLES.SUPER_ADMIN && query.tenantId) {
-    // Super admin can optionally filter by a specific tenantId
+    // super admin can optionally filter by a specific tenantId
     filterConditions.tenantId = new Types.ObjectId(query.tenantId as string);
   }
 
@@ -163,7 +162,7 @@ const getAllProjectsFromDB = async (
   };
 };
 
-// ======================= Get Single Project =======================
+
 const getProjectByIdFromDB = async (
   currentUser: JwtPayload,
   id: string,
@@ -179,7 +178,7 @@ const getProjectByIdFromDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
   }
 
-  // Strict Tenant Isolation Check
+  // strict Tenant Isolation Check
   if (currentUser.role === USER_ROLES.TENANT) {
     if (
       project.tenantId?._id?.toString() !== currentUser.id &&
@@ -205,7 +204,7 @@ const getProjectByIdFromDB = async (
   return project;
 };
 
-// ======================= Update Project =======================
+
 const updateProjectToDB = async (
   currentUser: JwtPayload,
   id: string,
@@ -225,7 +224,7 @@ const updateProjectToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
   }
 
-  // Ensure only the owner tenant (or super admin) can update
+  // ensure only the owner tenant (or super admin) can update
   if (
     currentUser.role === USER_ROLES.TENANT &&
     isExistProject.tenantId.toString() !== tenantId
@@ -233,7 +232,7 @@ const updateProjectToDB = async (
     throw new ApiError(StatusCodes.FORBIDDEN, "You do not own this project!");
   }
 
-  // Validate assigned users if updating assignments
+  // validate assigned users if updating assignments
   if (payload.assignedUsers && payload.assignedUsers.length > 0) {
     const validUsersCount = await User.countDocuments({
       _id: { $in: payload.assignedUsers },
@@ -258,7 +257,7 @@ const updateProjectToDB = async (
   return result;
 };
 
-// =================== Update Project Progress ===================
+
 const updateProjectProgressToDB = async (
   currentUser: JwtPayload,
   id: string,
@@ -274,7 +273,7 @@ const updateProjectProgressToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
   }
 
-  // Tenant Isolation and Access Check
+  // tenant Isolation and Access Check
   if (currentUser.role === USER_ROLES.USER) {
     const isAssigned = project.assignedUsers?.some(
       (userId: any) => userId.toString() === currentUser.id,
@@ -292,7 +291,7 @@ const updateProjectProgressToDB = async (
     throw new ApiError(StatusCodes.FORBIDDEN, "Access denied to this project!");
   }
 
-  // Feature Gating: Check if tenant's plan allows progress updates
+  // feature Gating: Check if tenant's plan allows progress updates
   const tenant = await User.findById(project.tenantId);
   if (tenant?.subscriptionPlanId) {
     const plan = await SubscriptionPlan.findById(tenant.subscriptionPlanId);
@@ -304,7 +303,7 @@ const updateProjectProgressToDB = async (
     }
   }
 
-  // Automatically mark completed if progress reaches 100
+  // automatically mark completed if progress reaches 100
   let newStatus = status || project.status;
   if (progress === 100 && !status) {
     newStatus = PROJECT_STATUS.COMPLETED;
@@ -326,7 +325,7 @@ const updateProjectProgressToDB = async (
   return result;
 };
 
-// ======================= Delete Project =======================
+
 const deleteProjectFromDB = async (
   currentUser: JwtPayload,
   id: string,

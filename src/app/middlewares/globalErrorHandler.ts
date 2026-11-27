@@ -84,7 +84,6 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
         ]
       : [];
   }
-  // STRICT MODE (default fallback)
   return res.status(statusCode).json({
     success: false,
     message,
