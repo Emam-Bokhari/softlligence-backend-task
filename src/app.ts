@@ -20,13 +20,7 @@ app.use(
 app.use(
   cors({
     origin: [
-      "http://10.10.26.182:3000",
-      "http://10.10.26.182:3001",
-      "http://10.10.26.182:3002",
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
-      "http://localhost:3003",
+      "https://softlligence-frontend-task.vercel.app"
     ],
     credentials: true,
   }),
