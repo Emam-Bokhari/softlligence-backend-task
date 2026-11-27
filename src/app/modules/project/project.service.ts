@@ -18,7 +18,9 @@ const createProjectToDB = async (
   payload: Partial<TProject>,
 ): Promise<TProject> => {
   const tenantId =
-    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : currentUser.tenantId;
 
   if (!tenantId) {
     throw new ApiError(
@@ -179,15 +181,24 @@ const getProjectByIdFromDB = async (
 
   // Strict Tenant Isolation Check
   if (currentUser.role === USER_ROLES.TENANT) {
-    if (project.tenantId?._id?.toString() !== currentUser.id && project.tenantId?.toString() !== currentUser.id) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "Access denied to this project!");
+    if (
+      project.tenantId?._id?.toString() !== currentUser.id &&
+      project.tenantId?.toString() !== currentUser.id
+    ) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Access denied to this project!",
+      );
     }
   } else if (currentUser.role === USER_ROLES.USER) {
     const isAssigned = project.assignedUsers?.some(
       (user: any) => user._id?.toString() === currentUser.id,
     );
     if (!isAssigned) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "You are not assigned to this project!");
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You are not assigned to this project!",
+      );
     }
   }
 
@@ -201,7 +212,9 @@ const updateProjectToDB = async (
   payload: Partial<TProject>,
 ): Promise<TProject | null> => {
   const tenantId =
-    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : currentUser.tenantId;
 
   const isExistProject = await Project.findOne({
     _id: id,
@@ -295,7 +308,12 @@ const updateProjectProgressToDB = async (
   let newStatus = status || project.status;
   if (progress === 100 && !status) {
     newStatus = PROJECT_STATUS.COMPLETED;
-  } else if (progress > 0 && progress < 100 && project.status === PROJECT_STATUS.PLANNING && !status) {
+  } else if (
+    progress > 0 &&
+    progress < 100 &&
+    project.status === PROJECT_STATUS.PLANNING &&
+    !status
+  ) {
     newStatus = PROJECT_STATUS.IN_PROGRESS;
   }
 
@@ -314,7 +332,9 @@ const deleteProjectFromDB = async (
   id: string,
 ): Promise<TProject | null> => {
   const tenantId =
-    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : currentUser.tenantId;
 
   const isExistProject = await Project.findOne({
     _id: id,

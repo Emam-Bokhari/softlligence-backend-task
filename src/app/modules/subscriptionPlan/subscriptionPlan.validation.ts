@@ -57,9 +57,21 @@ const purchaseSubscriptionPlanZodSchema = z.object({
   }),
 });
 
+const toggleFeatureZodSchema = z.object({
+  body: z.object({
+    featureKey: z.string({
+      required_error:
+        "featureKey is required (e.g., 'canUpdateProgress', 'allowedModules', 'isActive', 'maxUsers', 'maxProjects')",
+    }),
+    value: z.any({
+      required_error: "value is required",
+    }),
+  }),
+});
+
 export const SubscriptionPlanValidation = {
   createSubscriptionPlanZodSchema,
   updateSubscriptionPlanZodSchema,
   purchaseSubscriptionPlanZodSchema,
+  toggleFeatureZodSchema,
 };
-

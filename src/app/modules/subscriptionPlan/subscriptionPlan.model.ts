@@ -76,7 +76,7 @@ const subscriptionPlanSchema = new Schema<
 
 subscriptionPlanSchema.index({ isActive: 1, isDeleted: 1 });
 
-export const SubscriptionPlan = model<
-  TSubscriptionPlan,
-  SubscriptionPlanModel
->("SubscriptionPlan", subscriptionPlanSchema);
+export const SubscriptionPlan = model<TSubscriptionPlan, SubscriptionPlanModel>(
+  "SubscriptionPlan",
+  subscriptionPlanSchema,
+);

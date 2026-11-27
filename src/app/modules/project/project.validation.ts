@@ -3,9 +3,12 @@ import { PROJECT_STATUS } from "../../../enums/project";
 
 const createProjectZodSchema = z.object({
   body: z.object({
-    title: z.string({
-      required_error: "Title is required",
-    }).trim().min(1, "Title cannot be empty"),
+    title: z
+      .string({
+        required_error: "Title is required",
+      })
+      .trim()
+      .min(1, "Title cannot be empty"),
     description: z.string().trim().optional(),
     assignedUsers: z.array(z.string()).optional(),
     status: z.nativeEnum(PROJECT_STATUS).optional(),

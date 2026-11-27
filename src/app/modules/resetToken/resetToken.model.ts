@@ -36,8 +36,6 @@ resetTokenSchema.statics.isExpireToken = async (token: string) => {
   return !!resetToken;
 };
 
-
-
 export const ResetToken = model<IResetToken, ResetTokenModel>(
   "Token",
   resetTokenSchema,

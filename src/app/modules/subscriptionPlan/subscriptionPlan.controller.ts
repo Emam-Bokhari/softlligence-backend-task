@@ -21,8 +21,9 @@ const createSubscriptionPlan = catchAsync(
 
 const getAllSubscriptionPlans = catchAsync(
   async (req: Request, res: Response) => {
-    const result =
-      await SubscriptionPlanService.getAllSubscriptionPlansFromDB(req.query);
+    const result = await SubscriptionPlanService.getAllSubscriptionPlansFromDB(
+      req.query,
+    );
 
     sendResponse(res, {
       success: true,
@@ -52,8 +53,10 @@ const getSubscriptionPlanById = catchAsync(
 const updateSubscriptionPlan = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result =
-      await SubscriptionPlanService.updateSubscriptionPlanToDB(id, req.body);
+    const result = await SubscriptionPlanService.updateSubscriptionPlanToDB(
+      id,
+      req.body,
+    );
 
     sendResponse(res, {
       success: true,
@@ -96,6 +99,23 @@ const purchaseSubscriptionPlan = catchAsync(
   },
 );
 
+const toggleFeatureInPlan = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { featureKey, value } = req.body;
+  const result = await SubscriptionPlanService.toggleFeatureInPlanToDB(
+    id,
+    featureKey,
+    value,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: `Feature '${featureKey}' updated successfully`,
+    data: result,
+  });
+});
+
 const getMySubscriptionPlan = catchAsync(
   async (req: Request, res: Response) => {
     const result = await SubscriptionPlanService.getMySubscriptionPlanFromDB(
@@ -118,6 +138,6 @@ export const SubscriptionPlanController = {
   updateSubscriptionPlan,
   deleteSubscriptionPlan,
   purchaseSubscriptionPlan,
+  toggleFeatureInPlan,
   getMySubscriptionPlan,
 };
-

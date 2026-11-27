@@ -35,7 +35,8 @@ const signUpUserToDB = async (payload: ISignUpData) => {
   }
 
   const role =
-    payload.role && Object.values(USER_ROLES).includes(payload.role as USER_ROLES)
+    payload.role &&
+    Object.values(USER_ROLES).includes(payload.role as USER_ROLES)
       ? (payload.role as USER_ROLES)
       : USER_ROLES.TENANT;
 

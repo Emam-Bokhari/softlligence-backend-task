@@ -129,7 +129,9 @@ const purchaseSubscriptionPlanToDB = async (
   planId: string,
 ) => {
   const tenantId =
-    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : currentUser.tenantId;
 
   if (!tenantId) {
     throw new ApiError(
@@ -172,9 +174,51 @@ const purchaseSubscriptionPlanToDB = async (
   };
 };
 
+const toggleFeatureInPlanToDB = async (
+  id: string,
+  featureKey: string,
+  value: any,
+) => {
+  const isExistPlan = await SubscriptionPlan.findOne({
+    _id: id,
+    isDeleted: { $ne: true },
+  });
+
+  if (!isExistPlan) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Subscription plan not found!");
+  }
+
+  const updateDoc: Record<string, any> = {};
+
+  if (featureKey === "isActive") {
+    updateDoc.isActive = Boolean(value);
+  } else if (
+    ["canUpdateProgress", "allowedModules", "maxUsers", "maxProjects"].includes(
+      featureKey,
+    )
+  ) {
+    updateDoc[`features.${featureKey}`] = value;
+  } else {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      `Invalid feature key '${featureKey}'. Allowed: canUpdateProgress, allowedModules, isActive, maxUsers, maxProjects`,
+    );
+  }
+
+  const result = await SubscriptionPlan.findOneAndUpdate(
+    { _id: id },
+    { $set: updateDoc },
+    { new: true, runValidators: true },
+  );
+
+  return result;
+};
+
 const getMySubscriptionPlanFromDB = async (currentUser: JwtPayload) => {
   const tenantId =
-    currentUser.role === USER_ROLES.TENANT ? currentUser.id : currentUser.tenantId;
+    currentUser.role === USER_ROLES.TENANT
+      ? currentUser.id
+      : currentUser.tenantId;
 
   if (!tenantId) {
     throw new ApiError(
@@ -241,6 +285,6 @@ export const SubscriptionPlanService = {
   updateSubscriptionPlanToDB,
   deleteSubscriptionPlanFromDB,
   purchaseSubscriptionPlanToDB,
+  toggleFeatureInPlanToDB,
   getMySubscriptionPlanFromDB,
 };
-

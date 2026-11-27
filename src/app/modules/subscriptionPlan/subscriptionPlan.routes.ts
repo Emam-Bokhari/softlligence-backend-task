@@ -11,9 +11,7 @@ const router = express.Router();
 router.post(
   "/purchase",
   auth(USER_ROLES.TENANT),
-  validateRequest(
-    SubscriptionPlanValidation.purchaseSubscriptionPlanZodSchema,
-  ),
+  validateRequest(SubscriptionPlanValidation.purchaseSubscriptionPlanZodSchema),
   SubscriptionPlanController.purchaseSubscriptionPlan,
 );
 
@@ -28,9 +26,7 @@ router
   .route("/")
   .post(
     auth(USER_ROLES.SUPER_ADMIN),
-    validateRequest(
-      SubscriptionPlanValidation.createSubscriptionPlanZodSchema,
-    ),
+    validateRequest(SubscriptionPlanValidation.createSubscriptionPlanZodSchema),
     SubscriptionPlanController.createSubscriptionPlan,
   )
   .get(SubscriptionPlanController.getAllSubscriptionPlans);
@@ -40,14 +36,19 @@ router
   .get(SubscriptionPlanController.getSubscriptionPlanById)
   .patch(
     auth(USER_ROLES.SUPER_ADMIN),
-    validateRequest(
-      SubscriptionPlanValidation.updateSubscriptionPlanZodSchema,
-    ),
+    validateRequest(SubscriptionPlanValidation.updateSubscriptionPlanZodSchema),
     SubscriptionPlanController.updateSubscriptionPlan,
   )
   .delete(
     auth(USER_ROLES.SUPER_ADMIN),
     SubscriptionPlanController.deleteSubscriptionPlan,
   );
+
+router.patch(
+  "/:id/toggle-feature",
+  auth(USER_ROLES.SUPER_ADMIN),
+  validateRequest(SubscriptionPlanValidation.toggleFeatureZodSchema),
+  SubscriptionPlanController.toggleFeatureInPlan,
+);
 
 export const SubscriptionPlanRoutes = router;

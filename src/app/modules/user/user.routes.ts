@@ -4,10 +4,7 @@ import { UserValidation } from "./user.validation";
 import validateRequest from "../../middlewares/validateRequest";
 import auth from "../../middlewares/auth";
 import { USER_ROLES } from "../../../enums/user";
-import {
-  isAdmin,
-  isAuthenticated,
-} from "../../../helpers/authHelper";
+import { isAdmin, isAuthenticated } from "../../../helpers/authHelper";
 
 const router = express.Router();
 

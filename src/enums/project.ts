@@ -4,4 +4,3 @@ export enum PROJECT_STATUS {
   COMPLETED = "completed",
   ON_HOLD = "on_hold",
 }
- 

@@ -41,11 +41,7 @@ const getProjectById = catchAsync(async (req: Request, res: Response) => {
 
 const updateProject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await ProjectService.updateProjectToDB(
-    req.user,
-    id,
-    req.body,
-  );
+  const result = await ProjectService.updateProjectToDB(req.user, id, req.body);
 
   sendResponse(res, {
     success: true,

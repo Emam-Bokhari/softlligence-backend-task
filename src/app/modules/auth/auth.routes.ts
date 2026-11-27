@@ -6,7 +6,6 @@ import { isAuthenticated } from "../../../helpers/authHelper";
 
 const router = express.Router();
 
-
 router.post(
   "/signup",
   validateRequest(AuthValidation.signUpZodSchema),
@@ -19,13 +18,11 @@ router.post(
   AuthController.signUp,
 );
 
-
 router.post(
   "/login",
   validateRequest(AuthValidation.createLoginZodSchema),
   AuthController.loginUser,
 );
-
 
 router.post(
   "/verify-email",
@@ -45,9 +42,7 @@ router.post(
   AuthController.verifyEmail,
 );
 
-
 router.post("/resend-otp", AuthController.resendVerificationEmail);
-
 
 router.post(
   "/forget-password",
@@ -70,10 +65,6 @@ router.post(
 
 router.post("/refresh-token", AuthController.newAccessToken);
 
-router.delete(
-  "/delete-account",
-  isAuthenticated,
-  AuthController.deleteUser,
-);
+router.delete("/delete-account", isAuthenticated, AuthController.deleteUser);
 
 export const AuthRoutes = router;

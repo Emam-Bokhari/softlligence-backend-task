@@ -14,5 +14,3 @@ export type TProject = {
 };
 
 export type ProjectModel = Model<TProject>;
-
-

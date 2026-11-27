@@ -16,10 +16,7 @@ export const signUpBodyZodSchema = z
       .string({ required_error: "Password is required" })
       .min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().optional(),
-    role: z
-      .nativeEnum(USER_ROLES)
-      .optional()
-      .default(USER_ROLES.TENANT),
+    role: z.nativeEnum(USER_ROLES).optional().default(USER_ROLES.TENANT),
     gender: z.nativeEnum(GENDER).optional(),
   })
   .superRefine((data, ctx) => {

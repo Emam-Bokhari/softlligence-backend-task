@@ -1050,8 +1050,7 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
     values.trades && values.trades.length > 0
       ? values.trades.join(", ")
       : "General Contractor / Maintenance";
-  const propertiesDisplay =
-    values.propertiesScope || "All Assigned Work";
+  const propertiesDisplay = values.propertiesScope || "All Assigned Work";
 
   const content = `
 <tr>

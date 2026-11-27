@@ -7,4 +7,3 @@ const cryptoToken = (): string => {
 };
 
 export default cryptoToken;
-

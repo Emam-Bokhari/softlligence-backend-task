@@ -1,9 +1,5 @@
 import { Model, Types } from "mongoose";
-import {
-  GENDER,
-  STATUS,
-  USER_ROLES,
-} from "../../../enums/user";
+import { GENDER, STATUS, USER_ROLES } from "../../../enums/user";
 import { SUBSCRIPTION_STATUS } from "../../../enums/subscription";
 
 export type TUser = {
@@ -33,4 +29,3 @@ export type UserModel = {
   isExistUserByEmail(email: string): Promise<TUser | null>;
   isMatchPassword(password: string, hashPassword: string): Promise<boolean>;
 } & Model<TUser>;
-

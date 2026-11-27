@@ -49,5 +49,3 @@ export const UserValidation = {
   updateProfileZodSchema,
   updateUserStatusZodSchema,
 };
-
-

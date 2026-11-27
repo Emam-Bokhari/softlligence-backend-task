@@ -7,7 +7,6 @@ import bcrypt from "bcrypt";
 import config from "../../../config";
 
 const userSchema = new Schema<TUser, UserModel>(
-
   {
     name: {
       type: String,
@@ -141,6 +140,4 @@ userSchema.pre("save", async function (next) {
 userSchema.index({ role: 1 });
 userSchema.index({ tenantId: 1, isDeleted: 1 });
 
-
 export const User = model<TUser, UserModel>("User", userSchema);
-

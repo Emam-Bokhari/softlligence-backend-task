@@ -6,5 +6,3 @@ export type TJwtPayload = {
   role: USER_ROLES;
   tenantId?: string;
 };
-
-

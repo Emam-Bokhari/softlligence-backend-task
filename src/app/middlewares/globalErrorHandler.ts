@@ -7,7 +7,6 @@ import { errorLogger } from "../../shared/logger";
 import { IErrorMessage } from "../../types/errors.types";
 import { StatusCodes } from "http-status-codes";
 
-
 const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
   try {
     const errorInfo = {
