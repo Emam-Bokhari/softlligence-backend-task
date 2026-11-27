@@ -7,16 +7,17 @@ import {
 } from "../types/emailTemplate";
 
 const COLORS = {
-  background: "#FAFAF7",
+  background: "#F8FAFC",
   surface: "#FFFFFF",
-  border: "#E5E5E5",
-  primary: "#22813E",
-  text: "#1A1D24",
-  secondary: "#6B7280",
+  border: "#E2E8F0",
+  primary: "#4F39F6",
+  text: "#1E293B",
+  secondary: "#475569",
 };
 
 const LOGO =
-  "https://res.cloudinary.com/dphkhbunv/image/upload/v1792228916/Frame_2147231741_bwbf8a.png";
+  process.env.APP_LOGO_URL ||
+  "https://res.cloudinary.com/dphkhbunv/image/upload/v1795795341/logo-icon_yq86ss.png";
 
 const baseLayout = (title: string, content: string) => `
 <!DOCTYPE html>
@@ -72,26 +73,38 @@ overflow:hidden;
 
 <td
 align="center"
-style="padding:40px 36px 28px;"
+style="padding:36px 36px 24px;"
 >
 
 <img
 src="${LOGO}"
-width="180"
-alt="LocalFix"
+width="72"
+height="72"
+alt="SassFlow"
 style="
 display:block;
-max-width:180px;
-width:100%;
-height:auto;
-margin:0 auto;
-font-family:Arial,Helvetica,sans-serif;
-font-size:24px;
-font-weight:700;
-color:${COLORS.text};
+width:72px;
+height:72px;
+max-width:72px;
+margin:0 auto 12px;
+border-radius:18px;
 text-align:center;
+box-shadow:0 4px 12px rgba(79, 57, 246, 0.15);
 "
 />
+
+<div
+style="
+font-family:Arial,Helvetica,sans-serif;
+font-size:24px;
+font-weight:800;
+color:${COLORS.text};
+letter-spacing:-0.5px;
+text-align:center;
+"
+>
+Sass<span style="color:${COLORS.primary};">Flow</span>
+</div>
 
 </td>
 
@@ -144,7 +157,7 @@ color:${COLORS.secondary};
 "
 >
 
-This is an automated email from LocalFix.
+This is an automated email from SassFlow.
 
 </p>
 
@@ -156,7 +169,7 @@ color:#6B7280;
 "
 >
 
-© ${new Date().getFullYear()} LocalFix.
+© ${new Date().getFullYear()} SassFlow.
 All rights reserved.
 
 </p>
@@ -256,7 +269,7 @@ Security Tips
 
 <br>
 
-• LocalFix will never ask for your OTP.
+• SassFlow will never ask for your OTP.
 
 </td>
 
@@ -286,7 +299,7 @@ line-height:1.8;
 color:${COLORS.secondary};
 "
 >
-Welcome to <b style="color:${COLORS.text};">LocalFix</b>.
+Welcome to <b style="color:${COLORS.text};">SassFlow</b>.
 
 Thank you for creating your account.
 
@@ -306,15 +319,15 @@ line-height:1.8;
 color:${COLORS.secondary};
 "
 >
-If you didn't create a LocalFix account, you can safely ignore this email.
+If you didn't create a SassFlow account, you can safely ignore this email.
 No further action is required.
 </p>
 `;
 
   return {
     to: values.email,
-    subject: "Verify your LocalFix account",
-    html: baseLayout("Verify your LocalFix account", content),
+    subject: "Verify your SassFlow account",
+    html: baseLayout("Verify your SassFlow account", content),
   };
 };
 
@@ -340,7 +353,7 @@ color:${COLORS.secondary};
 "
 >
 We received a request to reset the password for your
-<b style="color:${COLORS.text};">LocalFix</b> account.
+<b style="color:${COLORS.text};">SassFlow</b> account.
 
 Use the verification code below to continue.
 </p>
@@ -365,8 +378,8 @@ Your account remains secure.
 
   return {
     to: values.email,
-    subject: "Reset your LocalFix password",
-    html: baseLayout("Reset your LocalFix password", content),
+    subject: "Reset your SassFlow password",
+    html: baseLayout("Reset your SassFlow password", content),
   };
 };
 
@@ -400,7 +413,7 @@ color:${COLORS.secondary};
 "
 >
 A new support request has been submitted through the
-<b style="color:${COLORS.text};">LocalFix</b> platform.
+<b style="color:${COLORS.text};">SassFlow</b> platform.
 
 The request details are shown below.
 </p>
@@ -595,7 +608,7 @@ Internal Notification
 
 <br><br>
 
-This email was automatically generated after a user submitted a support request through LocalFix.
+This email was automatically generated after a user submitted a support request through SassFlow.
 
 <br><br>
 
@@ -610,7 +623,7 @@ Please review the request and respond as soon as possible.
 
   return {
     to: values.to,
-    subject: `LocalFix Support Request: ${values.subject}`,
+    subject: `SassFlow Support Request: ${values.subject}`,
     html: baseLayout("Support Request", content),
   };
 };
@@ -904,23 +917,23 @@ const tenantInvitation = (values: ITenantInvitationEmail) => {
     
     <!-- Header Banner -->
     <div style="text-align: center; margin-bottom: 24px;">
-      <span style="display: inline-block; padding: 6px 14px; background-color: #EFF6FF; color: #2563EB; font-size: 12px; font-weight: 700; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
+      <span style="display: inline-block; padding: 6px 14px; background-color: #EEF2FF; color: #4F39F6; font-size: 12px; font-weight: 700; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
         Tenant Invitation
       </span>
-      <h1 style="margin: 12px 0 6px; font-size: 22px; font-weight: 700; color: #0F172A;">
+      <h1 style="margin: 12px 0 6px; font-size: 22px; font-weight: 700; color: #1E293B;">
         Welcome to Your New Home!
       </h1>
-      <p style="margin: 0; font-size: 14px; color: #64748B; line-height: 1.5;">
+      <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5;">
         ${values.inviterName ? `<strong>${values.inviterName}</strong> has invited you` : "You have been invited"} to access your portal for <strong>${values.flatUnitName}</strong>.
       </p>
     </div>
 
     <!-- Property Card (Matching App Screen 1) -->
     <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px; margin-bottom: 24px;">
-      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #2563EB; letter-spacing: 0.05em; margin-bottom: 4px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F39F6; letter-spacing: 0.05em; margin-bottom: 4px;">
         Property & Flat Assignment
       </div>
-      <div style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 2px;">
+      <div style="font-size: 17px; font-weight: 700; color: #1E293B; margin-bottom: 2px;">
         ${values.flatUnitName} - ${values.propertyName}
       </div>
       <div style="font-size: 13px; color: #64748B;">
@@ -929,13 +942,13 @@ const tenantInvitation = (values: ITenantInvitationEmail) => {
     </div>
 
     <!-- Credentials Section -->
-    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;">
+    <div style="background-color: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;">
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 14px; font-weight: 700; color: #1E40AF;">
+        <span style="font-size: 14px; font-weight: 700; color: #3730A3;">
           🔐 Your Account Credentials
         </span>
       </div>
-      <p style="margin: 0 0 14px; font-size: 13px; color: #1E3A8A; line-height: 1.5;">
+      <p style="margin: 0 0 14px; font-size: 13px; color: #3730A3; line-height: 1.5;">
         Your tenant account has been automatically provisioned. Use the details below to log in:
       </p>
       
@@ -945,7 +958,7 @@ const tenantInvitation = (values: ITenantInvitationEmail) => {
             Email Address:
           </td>
           <td style="padding: 6px 0;">
-            <code style="background-color: #DBEAFE; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
+            <code style="background-color: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
               ${values.email}
             </code>
           </td>
@@ -955,14 +968,14 @@ const tenantInvitation = (values: ITenantInvitationEmail) => {
             Password:
           </td>
           <td style="padding: 6px 0;">
-            <code style="background-color: #DBEAFE; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
+            <code style="background-color: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
               ${passwordDisplay}
             </code>
           </td>
         </tr>
       </table>
       
-      <p style="margin: 8px 0 0; font-size: 11px; color: #3B82F6;">
+      <p style="margin: 8px 0 0; font-size: 11px; color: #4F39F6;">
         💡 Tip: For security reasons, we strongly recommend changing your password after your first login.
       </p>
     </div>
@@ -1059,25 +1072,25 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
     
     <!-- Header Banner -->
     <div style="text-align: center; margin-bottom: 24px;">
-      <span style="display: inline-block; padding: 6px 14px; background-color: #EFF6FF; color: #2563EB; font-size: 12px; font-weight: 700; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
+      <span style="display: inline-block; padding: 6px 14px; background-color: #EEF2FF; color: #4F39F6; font-size: 12px; font-weight: 700; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
         Professional Invitation
       </span>
-      <h1 style="margin: 12px 0 6px; font-size: 22px; font-weight: 700; color: #0F172A;">
-        Welcome to LocalFix!
+      <h1 style="margin: 12px 0 6px; font-size: 22px; font-weight: 700; color: #1E293B;">
+        Welcome to SassFlow!
       </h1>
-      <p style="margin: 0; font-size: 14px; color: #64748B; line-height: 1.5;">
-        ${values.inviterName ? `<strong>${values.inviterName}</strong>` : "LocalFix Team"} has invited you to join as a trusted professional.
+      <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5;">
+        ${values.inviterName ? `<strong>${values.inviterName}</strong>` : "SassFlow Team"} has invited you to join as a trusted professional.
       </p>
     </div>
 
     <!-- Credentials Section -->
-    <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;">
+    <div style="background-color: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;">
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 14px; font-weight: 700; color: #1E40AF;">
+        <span style="font-size: 14px; font-weight: 700; color: #3730A3;">
           🔐 Your Account Credentials
         </span>
       </div>
-      <p style="margin: 0 0 14px; font-size: 13px; color: #1E3A8A; line-height: 1.5;">
+      <p style="margin: 0 0 14px; font-size: 13px; color: #3730A3; line-height: 1.5;">
         Your professional account has been provisioned. Use the credentials below to log in:
       </p>
       
@@ -1087,7 +1100,7 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
             Email Address:
           </td>
           <td style="padding: 6px 0;">
-            <code style="background-color: #DBEAFE; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
+            <code style="background-color: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
               ${values.email}
             </code>
           </td>
@@ -1097,51 +1110,51 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
             Password:
           </td>
           <td style="padding: 6px 0;">
-            <code style="background-color: #DBEAFE; color: #1E40AF; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
+            <code style="background-color: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: monospace;">
               ${passwordDisplay}
             </code>
           </td>
         </tr>
       </table>
       
-      <p style="margin: 8px 0 0; font-size: 11px; color: #3B82F6;">
+      <p style="margin: 8px 0 0; font-size: 11px; color: #4F39F6;">
         💡 Tip: For security reasons, you can update your password at any time from your account settings.
       </p>
     </div>
 
     <!-- Assignment Summary -->
     <div style="border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; background-color: #FFFFFF;">
-      <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 14px; border-bottom: 1px solid #F1F5F9; padding-bottom: 8px;">
+      <div style="font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 14px; border-bottom: 1px solid #F1F5F9; padding-bottom: 8px;">
         Assignment & Scope Details
       </div>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px;">
         <tr>
-          <td style="padding: 7px 0; color: #64748B;">Professional:</td>
-          <td align="right" style="padding: 7px 0; font-weight: 600; color: #0F172A;">${values.contractorName || values.email}</td>
+          <td style="padding: 7px 0; color: #475569;">Professional:</td>
+          <td align="right" style="padding: 7px 0; font-weight: 600; color: #1E293B;">${values.contractorName || values.email}</td>
         </tr>
         ${
           values.inviterName
             ? `<tr>
-          <td style="padding: 7px 0; color: #64748B;">Invited By:</td>
-          <td align="right" style="padding: 7px 0; font-weight: 600; color: #0F172A;">${values.inviterName}</td>
+          <td style="padding: 7px 0; color: #475569;">Invited By:</td>
+          <td align="right" style="padding: 7px 0; font-weight: 600; color: #1E293B;">${values.inviterName}</td>
         </tr>`
             : ""
         }
         <tr>
-          <td style="padding: 7px 0; color: #64748B;">Trade / Specialty:</td>
-          <td align="right" style="padding: 7px 0; font-weight: 600; color: #2563EB;">${tradesDisplay}</td>
+          <td style="padding: 7px 0; color: #475569;">Trade / Specialty:</td>
+          <td align="right" style="padding: 7px 0; font-weight: 600; color: #4F39F6;">${tradesDisplay}</td>
         </tr>
         <tr>
-          <td style="padding: 7px 0; color: #64748B;">Scope:</td>
-          <td align="right" style="padding: 7px 0; font-weight: 600; color: #0F172A;">${propertiesDisplay}</td>
+          <td style="padding: 7px 0; color: #475569;">Scope:</td>
+          <td align="right" style="padding: 7px 0; font-weight: 600; color: #1E293B;">${propertiesDisplay}</td>
         </tr>
         ${
           values.personalMessage
             ? `<tr>
           <td colspan="2" style="padding-top: 12px; border-top: 1px dashed #E2E8F0;">
-            <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700; margin-bottom: 4px;">Personal Note:</div>
-            <div style="font-style: italic; color: #334155; background-color: #F8FAFC; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #2563EB;">
+            <div style="font-size: 11px; text-transform: uppercase; color: #475569; font-weight: 700; margin-bottom: 4px;">Personal Note:</div>
+            <div style="font-style: italic; color: #334155; background-color: #F8FAFC; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #4F39F6;">
               "${values.personalMessage}"
             </div>
           </td>
@@ -1162,7 +1175,7 @@ const contractorInvitation = (values: IContractorInvitationEmail) => {
 
   return {
     to: values.email,
-    subject: `Invitation - ${values.inviterName ? `${values.inviterName} on ` : ""}LocalFix`,
+    subject: `Invitation - ${values.inviterName ? `${values.inviterName} on ` : ""}SassFlow`,
     html: baseLayout("Invitation", content),
   };
 };
@@ -1188,7 +1201,7 @@ line-height:1.8;
 color:${COLORS.secondary};
 "
 >
-You have been added as a team member under <b style="color:${COLORS.text};">${values.tenantName}</b> on LocalFix.
+You have been added as a team member under <b style="color:${COLORS.text};">${values.tenantName}</b> on SassFlow.
 You can now log in to your account using the credentials provided below:
 </p>
 
@@ -1218,8 +1231,8 @@ border-radius:12px;
 </tr>
 </table>
 
-<div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
-  <p style="margin: 0; font-size: 13px; color: #1E40AF; line-height: 1.6;">
+<div style="background-color: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
+  <p style="margin: 0; font-size: 13px; color: #3730A3; line-height: 1.6;">
     💡 <b>Security Tip:</b> For your security, we strongly recommend that you log in and change your password immediately from your profile settings.
   </p>
 </div>
@@ -1238,7 +1251,7 @@ If you believe this invitation was sent to you by mistake, please contact your a
 
   return {
     to: values.email,
-    subject: `Welcome to ${values.tenantName}'s team on LocalFix`,
+    subject: `Welcome to ${values.tenantName}'s team on SassFlow`,
     html: baseLayout("Team Member Invitation", content),
   };
 };

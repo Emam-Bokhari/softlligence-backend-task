@@ -7,10 +7,13 @@ import { ProjectValidation } from "./project.validation";
 
 const router = express.Router();
 
-router.use(
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT, USER_ROLES.USER),
-);
+router.use(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT, USER_ROLES.USER));
 
+router.get(
+  "/:id/activities",
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.TENANT, USER_ROLES.USER),
+  ProjectController.getProjectActivities,
+);
 
 router.patch(
   "/:id/progress",
@@ -18,7 +21,6 @@ router.patch(
   validateRequest(ProjectValidation.updateProgressZodSchema),
   ProjectController.updateProjectProgress,
 );
-
 
 router
   .route("/")
@@ -43,9 +45,6 @@ router
     validateRequest(ProjectValidation.updateProjectZodSchema),
     ProjectController.updateProject,
   )
-  .delete(
-    auth(USER_ROLES.TENANT),
-    ProjectController.deleteProject,
-  );
+  .delete(auth(USER_ROLES.TENANT), ProjectController.deleteProject);
 
 export const ProjectRoutes = router;

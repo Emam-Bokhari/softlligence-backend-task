@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <!-- Primary Brand Gradient (#4F39F6 Indigo/Violet) -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3730A3" />
+      <stop offset="50%" stop-color="#4F39F6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <!-- Flow Ribbon 1 Gradient -->
+    <linearGradient id="ribbon1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98" />
+      <stop offset="100%" stop-color="#EEF2FF" stop-opacity="1" />
+    </linearGradient>
+
+    <!-- Flow Ribbon 2 Gradient -->
+    <linearGradient id="ribbon2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C7D2FE" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1E1B4B" flood-opacity="0.35" />
+    </filter>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle Container -->
+  <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#bgGrad)" filter="url(#dropShadow)" />
+
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="7.5" y="7.5" width="113" height="113" rx="28.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5" />
+
+  <!-- Dynamic SassFlow Wave / Ribbon Mark -->
+  <g filter="url(#glow)">
+    <!-- Upper Stream Curve (S-top wave) -->
+    <path
+      d="M38 46 C38 35, 52 30, 68 30 C86 30, 92 41, 88 52 C84 62, 64 63, 56 68 C45 74, 40 82, 42 92 C44 100, 56 102, 70 99"
+      fill="none"
+      stroke="url(#ribbon1)"
+      stroke-width="13"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Intersecting Energy Flow Accent (Flow loop accent) -->
+    <path
+      d="M86 42 C92 48, 92 60, 80 67 C68 73, 52 74, 52 86 C52 94, 62 98, 76 96 C88 94, 94 86, 94 76"
+      fill="none"
+      stroke="url(#ribbon2)"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity="0.85"
+    />
+
+    <!-- Sparkle Circles -->
+    <circle cx="89" cy="38" r="5" fill="#FFFFFF" />
+    <circle cx="39" cy="91" r="3.5" fill="#DDD6FE" />
+  </g>
+</svg>
+

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient for Icon (#4F39F6) -->
+    <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3730A3" />
+      <stop offset="50%" stop-color="#4F39F6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <!-- Ribbon Gradient -->
+    <linearGradient id="logoRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#EEF2FF" />
+    </linearGradient>
+
+    <filter id="logoShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1E1B4B" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Left Brand Mark (Squircle Icon) -->
+  <g transform="translate(10, 10)">
+    <rect x="0" y="0" width="80" height="80" rx="22" fill="url(#logoBgGrad)" filter="url(#logoShadow)" />
+    <rect x="1" y="1" width="78" height="78" rx="21" fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.2" />
+
+    <!-- Stylized S Flow Ribbon -->
+    <path
+      d="M24 31 C24 23, 34 19, 45 19 C57 19, 61 27, 58 35 C55 42, 42 43, 36 46 C29 50, 26 55, 27 62 C29 68, 38 69, 47 67"
+      fill="none"
+      stroke="url(#logoRibbon)"
+      stroke-width="9"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M57 28 C61 33, 61 41, 53 45 C45 49, 34 50, 34 58 C34 63, 41 66, 51 64"
+      fill="none"
+      stroke="#C7D2FE"
+      stroke-width="5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity="0.85"
+    />
+    <circle cx="59" cy="26" r="3.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- Brand Typography -->
+  <g transform="translate(108, 0)">
+    <!-- "Sass" in Eye-Comfort Deep Slate -->
+    <text
+      x="0"
+      y="58"
+      font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+      font-size="44"
+      font-weight="800"
+      fill="#1E293B"
+      letter-spacing="-1.2px"
+    >
+      Sass
+    </text>
+
+    <!-- "Flow" in Brand Primary #4F39F6 -->
+    <text
+      x="108"
+      y="58"
+      font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+      font-size="44"
+      font-weight="800"
+      fill="#4F39F6"
+      letter-spacing="-1.2px"
+    >
+      Flow
+    </text>
+
+    <!-- Dot Pulse Accent -->
+    <circle cx="218" cy="46" r="5.5" fill="#6366F1" />
+
+    <!-- Subtitle / Platform Tagline in Comfortable Muted Slate -->
+    <text
+      x="2"
+      y="80"
+      font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+      font-size="12"
+      font-weight="600"
+      fill="#64748B"
+      letter-spacing="2.8px"
+    >
+      MULTI-TENANT SAAS PLATFORM
+    </text>
+  </g>
+</svg>
+

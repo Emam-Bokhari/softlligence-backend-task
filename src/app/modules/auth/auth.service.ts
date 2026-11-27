@@ -20,7 +20,6 @@ import { emailTemplate } from "../../../shared/emailTemplate";
 import { STATUS, USER_ROLES } from "../../../enums/user";
 import { TUser } from "../user/user.interface";
 
-
 const signUpUserToDB = async (payload: ISignUpData) => {
   const { email, password, name } = payload;
 
@@ -113,7 +112,6 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     user: populatedUser || newUser,
   };
 };
-
 
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
@@ -226,7 +224,6 @@ const forgetPasswordToDB = async (email: string) => {
 
   return { message: "A password reset OTP has been sent to your email." };
 };
-
 
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
@@ -342,7 +339,6 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   return { data, message };
 };
 
-
 const resetPasswordToDB = async (
   token: string,
   payload: IAuthResetPassword,
@@ -410,7 +406,6 @@ const resetPasswordToDB = async (
   return { message: "Password reset successfully." };
 };
 
-
 const changePasswordToDB = async (
   user: JwtPayload,
   payload: IChangePassword,
@@ -461,7 +456,6 @@ const changePasswordToDB = async (
   );
 };
 
-
 const newAccessTokenToUser = async (token: string) => {
   if (!token) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Refresh token is required!");
@@ -497,7 +491,6 @@ const newAccessTokenToUser = async (token: string) => {
 
   return { accessToken };
 };
-
 
 const resendVerificationEmailToDB = async (email: string) => {
   if (!email) {
@@ -549,7 +542,6 @@ const resendVerificationEmailToDB = async (email: string) => {
     message: "A new OTP verification code has been sent to your email.",
   };
 };
-
 
 const deleteUserFromDB = async (user: JwtPayload, password?: string) => {
   const isExistUser = await User.findById(user.id).select("+password");

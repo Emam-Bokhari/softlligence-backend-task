@@ -16,7 +16,6 @@ import { Types } from "mongoose";
 import { emailHelper } from "../../../helpers/emailHelper";
 import { emailTemplate } from "../../../shared/emailTemplate";
 
-
 const createUserToDB = async (payload: ISignUpData) => {
   return await AuthService.signUpUserToDB(payload);
 };
@@ -34,7 +33,6 @@ const createTeamMemberToDB = async (
 
   const tenantId = currentUser.id;
 
-
   const tenant = await User.findOne({
     _id: tenantId,
     role: USER_ROLES.TENANT,
@@ -44,7 +42,6 @@ const createTeamMemberToDB = async (
   if (!tenant) {
     throw new ApiError(StatusCodes.NOT_FOUND, "Tenant not found!");
   }
-
 
   if (
     !tenant.subscriptionPlanId ||
@@ -82,7 +79,6 @@ const createTeamMemberToDB = async (
       );
     }
   }
-
 
   const normalizedEmail = payload.email.trim().toLowerCase();
   const isExistUser = await User.findOne({ email: normalizedEmail });
@@ -173,7 +169,6 @@ const getUsersFromDB = async (
 ) => {
   const queryObj = { ...query };
 
-
   const filterConditions: Record<string, any> = { isDeleted: { $ne: true } };
 
   if (currentUser.role === USER_ROLES.TENANT) {
@@ -212,7 +207,6 @@ const getUserByIdFromDB = async (currentUser: JwtPayload, id: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No user is found by this ID");
   }
 
- 
   if (currentUser.role === USER_ROLES.TENANT) {
     const isSelf = user._id.toString() === currentUser.id;
     const isMyMember = user.tenantId?.toString() === currentUser.id;

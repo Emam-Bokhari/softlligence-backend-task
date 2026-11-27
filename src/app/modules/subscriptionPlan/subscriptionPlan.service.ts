@@ -191,9 +191,7 @@ const toggleFeatureInPlanToDB = async (
   if (featureKey === "isActive") {
     updateDoc.isActive = Boolean(value);
   } else if (
-    ["canUpdateProgress", "maxUsers", "maxProjects"].includes(
-      featureKey,
-    )
+    ["canUpdateProgress", "maxUsers", "maxProjects"].includes(featureKey)
   ) {
     updateDoc[`features.${featureKey}`] = value;
   } else {

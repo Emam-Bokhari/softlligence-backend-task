@@ -1,5 +1,5 @@
 {
-  "name": "localfix-backend",
+  "name": "sassflow-backend",
   "version": "1.0.0",
   "main": "app.ts",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "author": "Moshfiqur Rahman",
   "license": "ISC",
-  "description": "",
+  "description": "SassFlow - Multi-Tenant Project & Subscription Management Platform",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",

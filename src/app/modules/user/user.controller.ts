@@ -5,7 +5,6 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { STATUS } from "../../../enums/user";
 
-
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const result = await UserService.createUserToDB(req.body);
@@ -19,7 +18,6 @@ const createUser = catchAsync(
   },
 );
 
-
 const createTeamMember = catchAsync(async (req: Request, res: Response) => {
   const result = await UserService.createTeamMemberToDB(req.user, req.body);
 
@@ -30,7 +28,6 @@ const createTeamMember = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 const updateProfile = catchAsync(async (req, res) => {
   const user: any = req.user;

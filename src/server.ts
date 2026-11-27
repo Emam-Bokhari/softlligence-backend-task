@@ -24,7 +24,7 @@ async function main() {
       typeof config.port === "number" ? config.port : Number(config.port);
 
     server = app.listen(port, config.ip_address as string, () => {
-      logger.info(`♻️  Application listening on port:${config.port}`);
+      logger.info(`♻️  SassFlow API listening on port:${config.port}`);
     });
   } catch (error) {
     errorLogger.error("🤢 Failed to connect Database", error);

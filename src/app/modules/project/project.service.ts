@@ -12,7 +12,6 @@ import { PROJECT_SEARCHABLE_FIELDS } from "./project.constant";
 import { TProject } from "./project.interface";
 import { Project } from "./project.model";
 
-
 const createProjectToDB = async (
   currentUser: JwtPayload,
   payload: Partial<TProject>,
@@ -26,7 +25,6 @@ const createProjectToDB = async (
 
   const tenantId = currentUser.id;
 
-
   const tenant = await User.findOne({
     _id: tenantId,
     role: USER_ROLES.TENANT,
@@ -36,7 +34,6 @@ const createProjectToDB = async (
   if (!tenant) {
     throw new ApiError(StatusCodes.NOT_FOUND, "Tenant account not found!");
   }
-
 
   if (
     !tenant.subscriptionPlanId ||
@@ -75,7 +72,6 @@ const createProjectToDB = async (
     }
   }
 
-
   if (payload.assignedUsers && payload.assignedUsers.length > 0) {
     const validUsersCount = await User.countDocuments({
       _id: { $in: payload.assignedUsers },
@@ -91,12 +87,33 @@ const createProjectToDB = async (
     }
   }
 
- 
+  const user = await User.findById(currentUser.id).select("name");
+  const userName = user?.name || "Tenant";
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const initialActivity = {
+    performedBy: new Types.ObjectId(currentUser.id),
+    action: "PROJECT_CREATED",
+    message: `${userName} created project "${payload.title}" at ${formattedTime}`,
+    details: {
+      title: payload.title,
+      status: payload.status || PROJECT_STATUS.PLANNING,
+      progress: payload.progress || 0,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const projectData = {
     ...payload,
     tenantId: new Types.ObjectId(tenantId),
     progress: payload.progress || 0,
     status: payload.status || PROJECT_STATUS.PLANNING,
+    activities: [initialActivity],
   };
 
   const result = await Project.create(projectData);
@@ -147,7 +164,6 @@ const getAllProjectsFromDB = async (
   };
 };
 
-
 const getProjectByIdFromDB = async (
   currentUser: JwtPayload,
   id: string,
@@ -188,7 +204,6 @@ const getProjectByIdFromDB = async (
 
   return project;
 };
-
 
 const updateProjectToDB = async (
   currentUser: JwtPayload,
@@ -234,15 +249,34 @@ const updateProjectToDB = async (
     }
   }
 
+  const user = await User.findById(currentUser.id).select("name");
+  const userName = user?.name || "Tenant";
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const activity = {
+    performedBy: new Types.ObjectId(currentUser.id),
+    action: "PROJECT_UPDATED",
+    message: `${userName} updated project details at ${formattedTime}`,
+    details: payload,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const result = await Project.findOneAndUpdate(
     { _id: id },
-    { $set: payload },
+    {
+      $set: payload,
+      $push: { activities: activity },
+    },
     { new: true, runValidators: true },
   ).populate("assignedUsers", "name email");
 
   return result;
 };
-
 
 const updateProjectProgressToDB = async (
   currentUser: JwtPayload,
@@ -302,15 +336,44 @@ const updateProjectProgressToDB = async (
     newStatus = PROJECT_STATUS.IN_PROGRESS;
   }
 
+  const user = await User.findById(currentUser.id).select("name");
+  const userName = user?.name || "User";
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  let message = `${userName} updated progress to ${progress}% at ${formattedTime}`;
+  if (newStatus && newStatus !== project.status) {
+    message = `${userName} updated progress to ${progress}% (status: ${newStatus}) at ${formattedTime}`;
+  }
+
+  const activity = {
+    performedBy: new Types.ObjectId(currentUser.id),
+    action: "PROGRESS_UPDATED",
+    message,
+    details: {
+      previousProgress: project.progress,
+      newProgress: progress,
+      previousStatus: project.status,
+      newStatus,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const result = await Project.findOneAndUpdate(
     { _id: id },
-    { progress, status: newStatus },
+    {
+      progress,
+      status: newStatus,
+      $push: { activities: activity },
+    },
     { new: true, runValidators: true },
   ).populate("assignedUsers", "name email");
 
   return result;
 };
-
 
 const deleteProjectFromDB = async (
   currentUser: JwtPayload,
@@ -338,13 +401,122 @@ const deleteProjectFromDB = async (
     throw new ApiError(StatusCodes.FORBIDDEN, "You do not own this project!");
   }
 
+  const user = await User.findById(currentUser.id).select("name");
+  const userName = user?.name || "Tenant";
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const activity = {
+    performedBy: new Types.ObjectId(currentUser.id),
+    action: "PROJECT_DELETED",
+    message: `${userName} deleted the project at ${formattedTime}`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const result = await Project.findOneAndUpdate(
     { _id: id },
-    { isDeleted: true },
+    {
+      isDeleted: true,
+      $push: { activities: activity },
+    },
     { new: true },
   );
 
   return result;
+};
+
+const getProjectActivitiesFromDB = async (
+  currentUser: JwtPayload,
+  projectId: string,
+  query: Record<string, unknown>,
+) => {
+  const project = await Project.findOne({
+    _id: projectId,
+    isDeleted: { $ne: true },
+  }).populate("activities.performedBy", "name email role");
+
+  if (!project) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
+  }
+
+  // Strict Tenant Isolation and Access Check
+  if (currentUser.role === USER_ROLES.TENANT) {
+    if (project.tenantId.toString() !== currentUser.id) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Access denied to this project!",
+      );
+    }
+  } else if (currentUser.role === USER_ROLES.USER) {
+    const isAssigned = project.assignedUsers?.some(
+      (userId: any) => userId.toString() === currentUser.id,
+    );
+    if (!isAssigned) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You are not assigned to this project!",
+      );
+    }
+  }
+
+  let activities = (project.activities || []).map((item) => {
+    return (item as any).toObject ? (item as any).toObject() : item;
+  });
+
+  // Auto-seed baseline activity if none exist yet for previously created projects
+  if (activities.length === 0) {
+    const initialTime = project.createdAt
+      ? new Date(project.createdAt).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "earlier";
+    const baselineActivity = {
+      performedBy: project.tenantId,
+      action: "PROJECT_CREATED",
+      message: `Project "${project.title}" was created at ${initialTime}`,
+      details: {
+        progress: project.progress,
+        status: project.status,
+      },
+      createdAt: project.createdAt || new Date(),
+      updatedAt: project.createdAt || new Date(),
+    };
+    await Project.findByIdAndUpdate(projectId, {
+      $push: { activities: baselineActivity },
+    });
+    activities = [baselineActivity];
+  }
+
+  // Sort activities newest first by default
+  activities.sort(
+    (a: any, b: any) =>
+      new Date(b.createdAt || 0).getTime() -
+      new Date(a.createdAt || 0).getTime(),
+  );
+
+  // Pagination support
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const total = activities.length;
+  const totalPage = Math.ceil(total / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedActivities = activities.slice(startIndex, startIndex + limit);
+
+  return {
+    data: paginatedActivities,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage,
+    },
+  };
 };
 
 export const ProjectService = {
@@ -354,4 +526,5 @@ export const ProjectService = {
   updateProjectToDB,
   updateProjectProgressToDB,
   deleteProjectFromDB,
+  getProjectActivitiesFromDB,
 };

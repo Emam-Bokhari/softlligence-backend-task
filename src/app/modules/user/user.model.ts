@@ -117,7 +117,6 @@ const userSchema = new Schema<TUser, UserModel>(
   },
 );
 
-
 userSchema.statics.isExistUserById = async (id: string) => {
   return await User.findOne({ _id: id, isDeleted: { $ne: true } });
 };
@@ -125,7 +124,6 @@ userSchema.statics.isExistUserById = async (id: string) => {
 userSchema.statics.isExistUserByEmail = async (email: string) => {
   return await User.findOne({ email, isDeleted: { $ne: true } });
 };
-
 
 userSchema.statics.isMatchPassword = async (
   password: string,

@@ -83,6 +83,23 @@ const deleteProject = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getProjectActivities = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await ProjectService.getProjectActivitiesFromDB(
+    req.user,
+    id,
+    req.query,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Project activities retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 export const ProjectController = {
   createProject,
   getAllProjects,
@@ -90,4 +107,5 @@ export const ProjectController = {
   updateProject,
   updateProjectProgress,
   deleteProject,
+  getProjectActivities,
 };

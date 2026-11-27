@@ -46,4 +46,3 @@ export type ITeamMemberInvitationEmail = {
   password: string;
   tenantName: string;
 };
-

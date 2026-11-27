@@ -1,6 +1,34 @@
 import { model, Schema } from "mongoose";
 import { PROJECT_STATUS } from "../../../enums/project";
-import { ProjectModel, TProject } from "./project.interface";
+import { ProjectModel, TProject, TProjectActivity } from "./project.interface";
+
+const activitySchema = new Schema<TProjectActivity>(
+  {
+    performedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    action: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    details: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  {
+    timestamps: true,
+    _id: true,
+  },
+);
 
 const projectSchema = new Schema<TProject, ProjectModel>(
   {
@@ -36,6 +64,10 @@ const projectSchema = new Schema<TProject, ProjectModel>(
       enum: Object.values(PROJECT_STATUS),
       default: PROJECT_STATUS.PLANNING,
     },
+    activities: {
+      type: [activitySchema],
+      default: [],
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -48,5 +80,7 @@ const projectSchema = new Schema<TProject, ProjectModel>(
 );
 
 projectSchema.index({ tenantId: 1, isDeleted: 1 });
+projectSchema.index({ assignedUsers: 1, isDeleted: 1 });
+projectSchema.index({ status: 1, isDeleted: 1 });
 
 export const Project = model<TProject, ProjectModel>("Project", projectSchema);
