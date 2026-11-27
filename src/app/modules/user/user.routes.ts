@@ -33,7 +33,7 @@ router
 
 router.post(
   "/create-member",
-  auth(USER_ROLES.TENANT, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.TENANT),
   validateRequest(UserValidation.createTeamMemberZodSchema),
   UserController.createTeamMember,
 );

@@ -184,10 +184,16 @@ const loginUserFromDB = async (payload: ILoginData) => {
     config.jwt.jwtRefreshExpiresIn || "30d",
   );
 
+  const userData: Record<string, any> = isExistUser.toObject();
+  if (userData.role !== USER_ROLES.TENANT) {
+    delete userData.subscriptionPlanId;
+    delete userData.subscriptionStatus;
+  }
+
   return {
     token: createToken,
     refreshToken,
-    data: isExistUser,
+    data: userData,
   };
 };
 

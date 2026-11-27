@@ -17,17 +17,14 @@ const createProjectToDB = async (
   currentUser: JwtPayload,
   payload: Partial<TProject>,
 ): Promise<TProject> => {
-  const tenantId =
-    currentUser.role === USER_ROLES.TENANT
-      ? currentUser.id
-      : currentUser.tenantId;
-
-  if (!tenantId) {
+  if (currentUser.role !== USER_ROLES.TENANT) {
     throw new ApiError(
       StatusCodes.FORBIDDEN,
       "Only tenants can create projects!",
     );
   }
+
+  const tenantId = currentUser.id;
 
 
   const tenant = await User.findOne({
@@ -63,18 +60,6 @@ const createProjectToDB = async (
       "Your subscription plan is invalid or inactive. Please contact support.",
     );
   }
-
-
-  if (
-    plan.features?.allowedModules &&
-    !plan.features.allowedModules.includes("projects")
-  ) {
-    throw new ApiError(
-      StatusCodes.FORBIDDEN,
-      "Your current subscription plan does not have access to the projects module!",
-    );
-  }
-
 
   if (plan.features?.maxProjects) {
     const existingProjectsCount = await Project.countDocuments({
@@ -210,10 +195,14 @@ const updateProjectToDB = async (
   id: string,
   payload: Partial<TProject>,
 ): Promise<TProject | null> => {
-  const tenantId =
-    currentUser.role === USER_ROLES.TENANT
-      ? currentUser.id
-      : currentUser.tenantId;
+  if (currentUser.role !== USER_ROLES.TENANT) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "Only tenants can update projects!",
+    );
+  }
+
+  const tenantId = currentUser.id;
 
   const isExistProject = await Project.findOne({
     _id: id,
@@ -224,11 +213,8 @@ const updateProjectToDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
   }
 
-  // ensure only the owner tenant (or super admin) can update
-  if (
-    currentUser.role === USER_ROLES.TENANT &&
-    isExistProject.tenantId.toString() !== tenantId
-  ) {
+  // ensure only the owner tenant can update
+  if (isExistProject.tenantId.toString() !== tenantId) {
     throw new ApiError(StatusCodes.FORBIDDEN, "You do not own this project!");
   }
 
@@ -330,10 +316,14 @@ const deleteProjectFromDB = async (
   currentUser: JwtPayload,
   id: string,
 ): Promise<TProject | null> => {
-  const tenantId =
-    currentUser.role === USER_ROLES.TENANT
-      ? currentUser.id
-      : currentUser.tenantId;
+  if (currentUser.role !== USER_ROLES.TENANT) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "Only tenants can delete projects!",
+    );
+  }
+
+  const tenantId = currentUser.id;
 
   const isExistProject = await Project.findOne({
     _id: id,
@@ -344,10 +334,7 @@ const deleteProjectFromDB = async (
     throw new ApiError(StatusCodes.NOT_FOUND, "Project not found!");
   }
 
-  if (
-    currentUser.role === USER_ROLES.TENANT &&
-    isExistProject.tenantId.toString() !== tenantId
-  ) {
+  if (isExistProject.tenantId.toString() !== tenantId) {
     throw new ApiError(StatusCodes.FORBIDDEN, "You do not own this project!");
   }
 

@@ -5,7 +5,6 @@ export type TPlanFeatures = {
   maxUsers: number;
   maxProjects: number;
   canUpdateProgress: boolean;
-  allowedModules: string[];
 };
 
 export type TSubscriptionPlan = {

@@ -22,10 +22,6 @@ const planFeaturesSchema = new Schema<TPlanFeatures>(
       type: Boolean,
       default: true,
     },
-    allowedModules: {
-      type: [String],
-      default: ["projects"],
-    },
   },
   { _id: false },
 );

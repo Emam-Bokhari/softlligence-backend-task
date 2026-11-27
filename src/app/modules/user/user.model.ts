@@ -94,6 +94,10 @@ const userSchema = new Schema<TUser, UserModel>(
         delete ret.id;
         delete ret.password;
         delete ret.authentication;
+        if (ret.role !== USER_ROLES.TENANT) {
+          delete ret.subscriptionPlanId;
+          delete ret.subscriptionStatus;
+        }
         return ret;
       },
     },
@@ -103,6 +107,10 @@ const userSchema = new Schema<TUser, UserModel>(
         delete ret.id;
         delete ret.password;
         delete ret.authentication;
+        if (ret.role !== USER_ROLES.TENANT) {
+          delete ret.subscriptionPlanId;
+          delete ret.subscriptionStatus;
+        }
         return ret;
       },
     },

@@ -191,7 +191,7 @@ const toggleFeatureInPlanToDB = async (
   if (featureKey === "isActive") {
     updateDoc.isActive = Boolean(value);
   } else if (
-    ["canUpdateProgress", "allowedModules", "maxUsers", "maxProjects"].includes(
+    ["canUpdateProgress", "maxUsers", "maxProjects"].includes(
       featureKey,
     )
   ) {
@@ -199,7 +199,7 @@ const toggleFeatureInPlanToDB = async (
   } else {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      `Invalid feature key '${featureKey}'. Allowed: canUpdateProgress, allowedModules, isActive, maxUsers, maxProjects`,
+      `Invalid feature key '${featureKey}'. Allowed: canUpdateProgress, isActive, maxUsers, maxProjects`,
     );
   }
 

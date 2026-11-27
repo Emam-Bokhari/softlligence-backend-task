@@ -25,17 +25,14 @@ const createTeamMemberToDB = async (
   currentUser: JwtPayload,
   payload: Record<string, any>,
 ) => {
-  const tenantId =
-    currentUser.role === USER_ROLES.TENANT
-      ? currentUser.id
-      : payload.tenantId || currentUser.tenantId;
-
-  if (!tenantId) {
+  if (currentUser.role !== USER_ROLES.TENANT) {
     throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      "Tenant ID is required to create a team member!",
+      StatusCodes.FORBIDDEN,
+      "Only tenants can create team members for their organization!",
     );
   }
+
+  const tenantId = currentUser.id;
 
 
   const tenant = await User.findOne({
@@ -155,10 +152,13 @@ const updateProfileToDB = async (
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
+  if ("password" in payload) {
+    delete payload.password;
+  }
+
   const updatePayload: Record<string, any> = {};
   if (payload.name) updatePayload.name = payload.name;
   if (payload.gender) updatePayload.gender = payload.gender;
-  if (payload.password) updatePayload.password = payload.password;
 
   const updateDoc = await User.findOneAndUpdate({ _id: id }, updatePayload, {
     new: true,

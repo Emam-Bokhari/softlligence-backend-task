@@ -1,10 +1,8 @@
-import bcrypt from "bcrypt";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { UserService } from "./user.service";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import config from "../../../config";
 import { STATUS } from "../../../enums/user";
 
 
@@ -39,11 +37,8 @@ const updateProfile = catchAsync(async (req, res) => {
   if ("role" in req.body) {
     delete req.body.role;
   }
-  if (req.body.password) {
-    req.body.password = await bcrypt.hash(
-      req.body.password,
-      Number(config.bcrypt_salt_rounds),
-    );
+  if ("password" in req.body) {
+    delete req.body.password;
   }
 
   const result = await UserService.updateProfileToDB(user, req.body);

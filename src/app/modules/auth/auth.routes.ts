@@ -13,12 +13,6 @@ router.post(
 );
 
 router.post(
-  "/register",
-  validateRequest(AuthValidation.signUpZodSchema),
-  AuthController.signUp,
-);
-
-router.post(
   "/login",
   validateRequest(AuthValidation.createLoginZodSchema),
   AuthController.loginUser,

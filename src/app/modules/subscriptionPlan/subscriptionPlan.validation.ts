@@ -13,7 +13,6 @@ const planFeaturesZodSchema = z.object({
     })
     .min(1, "maxProjects must be at least 1"),
   canUpdateProgress: z.boolean().default(true),
-  allowedModules: z.array(z.string()).default(["projects"]),
 });
 
 const createSubscriptionPlanZodSchema = z.object({
@@ -61,7 +60,7 @@ const toggleFeatureZodSchema = z.object({
   body: z.object({
     featureKey: z.string({
       required_error:
-        "featureKey is required (e.g., 'canUpdateProgress', 'allowedModules', 'isActive', 'maxUsers', 'maxProjects')",
+        "featureKey is required (e.g., 'canUpdateProgress', 'isActive', 'maxUsers', 'maxProjects')",
     }),
     value: z.any({
       required_error: "value is required",
