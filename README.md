@@ -1,4 +1,4 @@
-# SassFlow Backend API
+# SassFlow Backend
 
 Multi-tenant project and subscription management backend platform built with Node.js, Express, TypeScript, and MongoDB.
 
