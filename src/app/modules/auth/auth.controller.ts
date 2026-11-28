@@ -4,6 +4,8 @@ import { AuthService } from "./auth.service";
 import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
+import config from "../../../config";
+import { emailHelper } from "../../../helpers/emailHelper";
 
 const signUp = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.signUpUserToDB(req.body);
@@ -118,6 +120,46 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const testEmail = catchAsync(async (req: Request, res: Response) => {
+  const targetEmail = (req.query.to as string) || config.email.user;
+
+  if (!config.email.user || !config.email.pass) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      message: "Email credentials missing in environment variables!",
+      data: {
+        host: config.email.host || null,
+        port: config.email.port || null,
+        userConfigured: !!config.email.user,
+        passConfigured: !!config.email.pass,
+      },
+    });
+  }
+
+  const result = await emailHelper.sendEmail({
+    to: targetEmail as string,
+    subject: "SassFlow Live Email Test",
+    html: "<p>If you see this, email sending from Vercel is working properly!</p>",
+  });
+
+  if (result) {
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: `Test email sent successfully to ${targetEmail}`,
+      data: result,
+    });
+  } else {
+    sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      message: "Failed to send email. Please check server logs.",
+      data: null,
+    });
+  }
+});
+
 export const AuthController = {
   signUp,
   verifyEmail,
@@ -128,4 +170,5 @@ export const AuthController = {
   newAccessToken,
   resendVerificationEmail,
   deleteUser,
+  testEmail,
 };

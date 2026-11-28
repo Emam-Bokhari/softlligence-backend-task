@@ -108,7 +108,7 @@ const createTeamMemberToDB = async (
     tenantName: tenant.name || "Your Organization",
   };
   const memberEmailTemplate = emailTemplate.teamMemberInvitation(emailValues);
-  emailHelper.sendEmail(memberEmailTemplate);
+  await emailHelper.sendEmail(memberEmailTemplate);
 
   return newMember;
 };

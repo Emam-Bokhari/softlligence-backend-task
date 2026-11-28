@@ -38,6 +38,8 @@ router.post(
 
 router.post("/resend-otp", AuthController.resendVerificationEmail);
 
+router.get("/test-email", AuthController.testEmail);
+
 router.post(
   "/forget-password",
   validateRequest(AuthValidation.createForgetPasswordZodSchema),

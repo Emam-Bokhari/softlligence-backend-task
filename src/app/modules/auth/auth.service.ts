@@ -88,7 +88,7 @@ const signUpUserToDB = async (payload: ISignUpData) => {
     email: newUser.email,
   };
   const accountEmailTemplate = emailTemplate.createAccount(emailValues);
-  emailHelper.sendEmail(accountEmailTemplate);
+  await emailHelper.sendEmail(accountEmailTemplate);
 
   // generate token
   const token = jwtHelper.createToken(
@@ -209,7 +209,7 @@ const forgetPasswordToDB = async (email: string) => {
   };
 
   const forgetPassword = emailTemplate.resetPassword(value);
-  emailHelper.sendEmail(forgetPassword);
+  await emailHelper.sendEmail(forgetPassword);
 
   const authentication = {
     oneTimeCode: Number(otp),
@@ -515,7 +515,7 @@ const resendVerificationEmailToDB = async (email: string) => {
       email: existingUser.email,
     };
     const resetPasswordTemplate = emailTemplate.resetPassword(emailValues);
-    emailHelper.sendEmail(resetPasswordTemplate);
+    await emailHelper.sendEmail(resetPasswordTemplate);
   } else {
     const emailValues = {
       name: existingUser.name,
@@ -523,7 +523,7 @@ const resendVerificationEmailToDB = async (email: string) => {
       email: existingUser.email,
     };
     const accountEmailTemplate = emailTemplate.createAccount(emailValues);
-    emailHelper.sendEmail(accountEmailTemplate);
+    await emailHelper.sendEmail(accountEmailTemplate);
   }
 
   const authentication = {
