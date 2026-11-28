@@ -200,6 +200,12 @@ Configure the following variables in `.env`:
 * `ADMIN_EMAIL`: Initial Super Admin email for automatic database seed
 * `ADMIN_PASSWORD`: Initial Super Admin password for automatic database seed
 
+## Postman API Documentation
+
+Interactive API documentation containing complete endpoint specifications, request payloads, headers, and response examples is available at:
+
+* Postman Documentation: https://documenter.getpostman.com/view/60453547/2sBYPwWrT1#1b1faf5e-063f-4a3d-a6a0-c480e6731aa5
+
 ## API Endpoints Reference
 
 Base URL path: `/api/v1`
@@ -333,4 +339,3 @@ Base URL path: `/api/v1`
 * Maintainer: Moshfiqur Rahman
 * Email: moshfiqurrahman37@gmail.com
 * GitHub: https://github.com/Emam-Bokhari
-* Repository: https://github.com/Emam-Bokhari/softlligence-backend-task
